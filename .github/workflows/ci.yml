@@ -5,6 +5,10 @@ on:
     branches: ["main"]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     permissions:
@@ -25,6 +29,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+          external-cache: true
+          disk-cache: ci-${{ matrix.phase8_target }}
+          cache-save: ${{ github.event_name != 'pull_request' }}
       - name: Run tests (${{ matrix.phase8_target }})
         run: |
           echo "Phase 8 target: ${{ matrix.phase8_target }}"

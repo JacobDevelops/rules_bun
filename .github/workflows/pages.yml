@@ -3,6 +3,11 @@ name: Docs Pages
 on:
   push:
     branches: ["main"]
+    paths:
+      - "docs/**"
+      - "bun/**/*.bzl"
+      - "internal/**/*.bzl"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -26,6 +31,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: bazel-contrib/setup-bazel@0.15.0
+        with:
+          bazelisk-cache: true
+          repository-cache: true
+          external-cache: true
+          disk-cache: docs-pages
 
       - name: Generate rule docs
         run: |
