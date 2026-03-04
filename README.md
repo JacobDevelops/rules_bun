@@ -4,6 +4,7 @@ Bazel rules for bun.
 
 ## Rule reference
 
+- Published docs site: https://eriyc.github.io/rules_bun/
 - Generated API docs: [docs/rules.md](docs/rules.md)
 - Regenerate: `bazel build //docs:rules_md && cp bazel-bin/docs/rules.md docs/rules.md`
 
@@ -143,7 +144,7 @@ bazel run //path/to:web_dev
 `bun_binary` and `bun_dev` support `working_dir`:
 
 - `"workspace"` (default): runs from the Bazel runfiles workspace root.
-- `"entry_point"`: runs from the entry point file's directory.
+- `"entry_point"`: runs from the nearest ancestor of the entry point that contains `.env` or `package.json` (falls back to the entry point directory).
 
 Use `"entry_point"` when Bun should resolve local files such as colocated `.env` files relative to the program directory.
 

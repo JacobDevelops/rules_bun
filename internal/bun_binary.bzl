@@ -14,14 +14,31 @@ def _bun_binary_impl(ctx):
 set -euo pipefail
 
 runfiles_dir="${{RUNFILES_DIR:-$0.runfiles}}"
+workspace_root="${{runfiles_dir}}/_main"
 bun_bin="${{runfiles_dir}}/_main/{bun_short_path}"
 entry_point="${{runfiles_dir}}/_main/{entry_short_path}"
 
+resolve_entrypoint_workdir() {{
+    local dir
+    dir="$(dirname "${{entry_point}}")"
+    while [[ "${{dir}}" == "${{workspace_root}}"* ]]; do
+        if [[ -f "${{dir}}/.env" || -f "${{dir}}/package.json" ]]; then
+            echo "${{dir}}"
+            return 0
+        fi
+        if [[ "${{dir}}" == "${{workspace_root}}" ]]; then
+            break
+        fi
+        dir="$(dirname "${{dir}}")"
+    done
+    echo "$(dirname "${{entry_point}}")"
+}}
+
 working_dir="{working_dir}"
 if [[ "${{working_dir}}" == "entry_point" ]]; then
-    cd "$(dirname "${{entry_point}}")"
+    cd "$(resolve_entrypoint_workdir)"
 else
-    cd "${{runfiles_dir}}/_main"
+    cd "${{workspace_root}}"
 fi
 
 exec "${{bun_bin}}" --bun run "${{entry_point}}" "$@"
@@ -71,7 +88,7 @@ Use this rule for non-test scripts and CLIs that should run via `bazel run`.
         "working_dir": attr.string(
             default = "workspace",
             values = ["workspace", "entry_point"],
-            doc = "Working directory at runtime: `workspace` root or `entry_point` directory.",
+            doc = "Working directory at runtime: `workspace` root or nearest `entry_point` ancestor containing `.env`/`package.json`.",
         ),
     },
     executable = True,

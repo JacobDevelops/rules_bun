@@ -5,8 +5,8 @@ module(
 
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
-bazel_dep(name = "bazel_skylib", version = "1.8.0")
-bazel_dep(name = "stardoc", version = "0.7.1")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "stardoc", version = "0.7.2")
 
 bun_ext = use_extension("//bun:extensions.bzl", "bun")
 use_repo(

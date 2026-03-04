@@ -57,3 +57,17 @@ sh_test(
     args = ["$(location :env_cwd_bin)"],
     data = [":env_cwd_bin"],
 )
+
+bun_binary(
+    name = "env_parent_cwd_bin",
+    entry_point = "env_parent/src/main.ts",
+    data = ["env_parent/.env"],
+    working_dir = "entry_point",
+)
+
+sh_test(
+    name = "bun_binary_env_parent_cwd_test",
+    srcs = ["run_parent_env_binary.sh"],
+    args = ["$(location :env_parent_cwd_bin)"],
+    data = [":env_parent_cwd_bin"],
+)
