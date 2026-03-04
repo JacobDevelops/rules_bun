@@ -3,12 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    devshell-lib.url = "git+https://git.dgren.dev/eric/nix-flake-lib?ref=v1.0.4";
+    devshell-lib.url = "git+https://git.dgren.dev/eric/nix-flake-lib?ref=v1.0.5";
     devshell-lib.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
     {
+      self,
       nixpkgs,
       devshell-lib,
       ...
@@ -41,6 +42,7 @@
               bun
               bazel9
               bazel-buildtools
+              self.packages.${system}.release
             ];
 
             features = {
@@ -86,7 +88,7 @@
                 name = "Bazel";
                 bin = "${bazel9}/bin/bazel";
                 versionCmd = "--version";
-                color = "BLUE";
+                color = "GREEN";
               }
             ];
 
