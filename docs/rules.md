@@ -26,6 +26,18 @@ Attributes:
 - `data` (label_list, optional): additional runtime files for dev process.
 - `working_dir` (string, default: `"workspace"`, values: `"workspace" | "entry_point"`): runtime working directory.
 
+## bun_script
+
+Runs a named `package.json` script with Bun as an executable target (`bazel run`).
+
+Attributes:
+
+- `script` (string, required): package script name passed to `bun run <script>`.
+- `package_json` (label, required): `package.json` file containing the named script.
+- `node_modules` (label, optional): Bun/npm package files in runfiles.
+- `data` (label_list, optional): additional runtime files for the script.
+- `working_dir` (string, default: `"package"`, values: `"workspace" | "package"`): runtime working directory.
+
 ## bun_bundle
 
 Bundles one or more JS/TS entry points with Bun build.

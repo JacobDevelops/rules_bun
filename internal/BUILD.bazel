@@ -7,6 +7,7 @@ exports_files([
     "bun_bundle.bzl",
     "bun_dev.bzl",
     "bun_install.bzl",
+    "bun_script.bzl",
     "bun_test.bzl",
     "js_library.bzl",
 ])
@@ -25,6 +26,11 @@ bzl_library(
 bzl_library(
     name = "bun_dev_bzl",
     srcs = ["bun_dev.bzl"],
+)
+
+bzl_library(
+    name = "bun_script_bzl",
+    srcs = ["bun_script.bzl"],
 )
 
 bzl_library(

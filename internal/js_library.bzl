@@ -1,7 +1,9 @@
 """Lightweight JS/TS source grouping rules."""
 
-BunSourcesInfo = provider(fields = ["transitive_sources"])
-
+BunSourcesInfo = provider(
+    "Provides transitive sources for Bun libraries.",
+    fields = ["transitive_sources"],
+)
 
 def _bun_library_impl(ctx):
     transitive_sources = [
@@ -17,7 +19,6 @@ def _bun_library_impl(ctx):
         BunSourcesInfo(transitive_sources = all_sources),
         DefaultInfo(files = all_sources),
     ]
-
 
 js_library = rule(
     implementation = _bun_library_impl,

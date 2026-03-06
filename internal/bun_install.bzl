@@ -19,7 +19,6 @@ def _select_bun_binary(repository_ctx):
 
     fail("Unsupported host platform: os={}, arch={}".format(repository_ctx.os.name, repository_ctx.os.arch))
 
-
 def _bun_install_repository_impl(repository_ctx):
     package_json = repository_ctx.path(repository_ctx.attr.package_json)
     bun_lockfile = repository_ctx.path(repository_ctx.attr.bun_lockfile)
@@ -60,7 +59,6 @@ stderr:
 """,
     )
 
-
 bun_install_repository = repository_rule(
     implementation = _bun_install_repository_impl,
     attrs = {
@@ -73,9 +71,6 @@ bun_install_repository = repository_rule(
         "bun_windows_x64": attr.label(default = "@bun_windows_x64//:bun", allow_single_file = True),
     },
 )
-
-_bun_install_repository = bun_install_repository
-
 
 def bun_install(name, package_json, bun_lockfile):
     """Create an external repository containing installed node_modules.

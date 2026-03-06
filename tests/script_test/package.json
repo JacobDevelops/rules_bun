@@ -1,0 +1,9 @@
+{
+  "name": "script-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hello": "bun ./hello.ts",
+    "print-env": "bun ./env.ts"
+  }
+}

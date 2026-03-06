@@ -10,6 +10,7 @@ stardoc(
         "bun_binary",
         "bun_bundle",
         "bun_dev",
+        "bun_script",
         "bun_test",
         "js_library",
         "ts_library",

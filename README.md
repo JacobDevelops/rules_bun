@@ -79,6 +79,7 @@ load(
 	"bun_binary",
 	"bun_bundle",
 	"bun_dev",
+	"bun_script",
 	"bun_test",
 	"js_library",
 	"ts_library",
@@ -110,6 +111,36 @@ bazel test //path/to:your_bun_test
 ```
 
 All `rules_bun` rule-driven Bun invocations pass `--bun`.
+
+## Package scripts (`bun_script`)
+
+Use `bun_script` to expose a `package.json` script as a Bazel executable target.
+
+```starlark
+load("@rules_bun//bun:defs.bzl", "bun_script")
+
+bun_script(
+	name = "web_dev",
+	script = "dev",
+	package_json = "package.json",
+	node_modules = "@npm//:node_modules",
+	data = glob([
+		"src/**",
+		"static/**",
+		"vite.config.*",
+		"svelte.config.*",
+		"tsconfig*.json",
+	]),
+)
+```
+
+Run it with:
+
+```bash
+bazel run //path/to:web_dev -- --host
+```
+
+`bun_script` defaults to running from the directory containing `package.json`, which matches the usual expectations for `vite`, `svelte-kit`, and similar package scripts.
 
 ## Development mode (`bun_dev`)
 

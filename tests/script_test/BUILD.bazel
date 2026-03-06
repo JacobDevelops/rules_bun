@@ -1,0 +1,33 @@
+load("//bun:defs.bzl", "bun_script")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+bun_script(
+    name = "hello_script",
+    script = "hello",
+    package_json = "package.json",
+    data = ["hello.ts"],
+)
+
+sh_test(
+    name = "bun_script_ts_test",
+    srcs = ["run_script.sh"],
+    args = ["$(location :hello_script)", "hello-script"],
+    data = [":hello_script"],
+)
+
+bun_script(
+    name = "env_script",
+    script = "print-env",
+    package_json = "package.json",
+    data = [
+        ".env",
+        "env.ts",
+    ],
+)
+
+sh_test(
+    name = "bun_script_package_cwd_test",
+    srcs = ["run_env_script.sh"],
+    args = ["$(location :env_script)"],
+    data = [":env_script"],
+)
