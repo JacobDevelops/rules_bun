@@ -29,6 +29,11 @@ bzl_library(
 )
 
 bzl_library(
+    name = "bun_install_bzl",
+    srcs = ["bun_install.bzl"],
+)
+
+bzl_library(
     name = "bun_script_bzl",
     srcs = ["bun_script.bzl"],
 )

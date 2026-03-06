@@ -86,7 +86,7 @@ declared in `package.json` and expect to run from the package directory with
             doc = "Label of the `package.json` file containing the named script.",
         ),
         "node_modules": attr.label(
-            doc = "Optional label providing Bun/npm package files in runfiles. Executables from `node_modules/.bin` are added to `PATH`, which is useful for scripts such as `vite`.",
+            doc = "Optional label providing package files from a `node_modules` tree, typically produced by `bun_install`, in runfiles. Executables from `node_modules/.bin` are added to `PATH`, which is useful for scripts such as `vite`.",
         ),
         "data": attr.label_list(
             allow_files = True,

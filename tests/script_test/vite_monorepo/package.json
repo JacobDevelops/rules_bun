@@ -1,0 +1,10 @@
+{
+  "name": "vite-monorepo-test",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "devDependencies": {
+    "vite": "5.4.14"
+  }
+}

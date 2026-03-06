@@ -189,8 +189,8 @@
   "moduleExtensions": {
     "//bun:extensions.bzl%bun": {
       "general": {
-        "bzlTransitiveDigest": "83P5DLnVhSu3AwYrHPGqYVY/L6twnM4Jnlhc8uAOOls=",
-        "usagesDigest": "SXT282ETYzRFxBNaQrX/Ym1rZzueKzjlll/D0arFoYs=",
+        "bzlTransitiveDigest": "dy4VVPGLJrnr4plt8TA/E8PGKCOMrDWu6M9D5NWfNJo=",
+        "usagesDigest": "pUJFcZPlt7todXukySNaxd4bl0KGB8biTd2Ygx044co=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
@@ -250,8 +250,8 @@
     },
     "//bun:extensions.bzl%bun_install": {
       "general": {
-        "bzlTransitiveDigest": "83P5DLnVhSu3AwYrHPGqYVY/L6twnM4Jnlhc8uAOOls=",
-        "usagesDigest": "BSZJHRsUZpMHTxqlUZZaq4MH8kfqrzFfF+50EqSPx/Q=",
+        "bzlTransitiveDigest": "dy4VVPGLJrnr4plt8TA/E8PGKCOMrDWu6M9D5NWfNJo=",
+        "usagesDigest": "xWWY9DPXS5FKvNZvUbM6w+PBr8q9KbWKiP8wfD4RHLU=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
@@ -261,6 +261,20 @@
             "attributes": {
               "package_json": "@@//tests/script_test:vite_app/package.json",
               "bun_lockfile": "@@//tests/script_test:vite_app/bun.lock"
+            }
+          },
+          "script_test_vite_monorepo_node_modules": {
+            "repoRuleId": "@@//internal:bun_install.bzl%bun_install_repository",
+            "attributes": {
+              "package_json": "@@//tests/script_test:vite_monorepo/package.json",
+              "bun_lockfile": "@@//tests/script_test:vite_monorepo/bun.lock"
+            }
+          },
+          "examples_vite_monorepo_node_modules": {
+            "repoRuleId": "@@//internal:bun_install.bzl%bun_install_repository",
+            "attributes": {
+              "package_json": "@@//examples/vite_monorepo:package.json",
+              "bun_lockfile": "@@//examples/vite_monorepo:bun.lock"
             }
           }
         }

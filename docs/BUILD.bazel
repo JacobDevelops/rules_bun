@@ -16,4 +16,5 @@ stardoc(
         "ts_library",
     ],
     deps = ["//bun:defs_bzl"],
+    target_compatible_with = ["@platforms//os:linux"],
 )

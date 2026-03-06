@@ -14,16 +14,21 @@ Supporting material lives in:
 
 - [examples/](../examples/) for usage samples
 - [tests/](../tests/) for repository conformance and integration tests
-- [docs/rules.md](rules.md) for generated rule reference
+- [docs/rules.md](rules.md) for generated build rule reference
+- [docs/bun_install.md](bun_install.md) for `bun_install` extension docs
 
 ## Rule reference
 
 - [rules.md](rules.md)
 
+## Bzlmod extensions
+
+- [bun_install.md](bun_install.md)
+
 ## Typical Bzlmod setup
 
 ```starlark
-bazel_dep(name = "rules_bun", version = "0.2.0")
+bazel_dep(name = "rules_bun", version = "0.2.1")
 
 bun_ext = use_extension("@rules_bun//bun:extensions.bzl", "bun")
 
@@ -50,6 +55,9 @@ register_toolchains(
 Use `bun_script` for package-script driven workflows such as `dev`, `build`,
 and `preview`.
 
+The `node_modules` label below refers to dependencies installed by
+`bun_install`.
+
 ```starlark
 load("@rules_bun//bun:defs.bzl", "bun_script")
 
@@ -57,7 +65,7 @@ bun_script(
 	name = "web_dev",
 	script = "dev",
 	package_json = "package.json",
-	node_modules = "@npm//:node_modules",
+	node_modules = "@my_workspace//:node_modules",
 	data = glob([
 		"src/**",
 		"public/**",

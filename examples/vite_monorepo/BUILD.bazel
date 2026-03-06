@@ -1,0 +1,33 @@
+load("//bun:defs.bzl", "bun_script")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "README.md",
+    "package.json",
+    "bun.lock",
+    "apps/app-a/package.json",
+    "apps/app-b/package.json",
+])
+
+bun_script(
+    name = "app_a_dev",
+    script = "dev",
+    package_json = "apps/app-a/package.json",
+    node_modules = "@examples_vite_monorepo_node_modules//:node_modules",
+    data = [
+        "apps/app-a/index.html",
+        "apps/app-a/main.js",
+    ],
+)
+
+bun_script(
+    name = "app_b_dev",
+    script = "dev",
+    package_json = "apps/app-b/package.json",
+    node_modules = "@examples_vite_monorepo_node_modules//:node_modules",
+    data = [
+        "apps/app-b/index.html",
+        "apps/app-b/main.js",
+    ],
+)

@@ -74,7 +74,7 @@ Supports Bazel test filtering (`--test_filter`) and coverage integration.
             doc = "Test source files passed to `bun test`.",
         ),
         "node_modules": attr.label(
-            doc = "Optional label providing Bun/npm package files in runfiles.",
+            doc = "Optional label providing package files from a `node_modules` tree, typically produced by `bun_install`, in runfiles.",
         ),
         "deps": attr.label_list(
             doc = "Library dependencies required by test sources.",

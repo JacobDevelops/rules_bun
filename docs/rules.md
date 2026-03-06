@@ -9,7 +9,7 @@ Runs a JS/TS entry point with Bun as an executable target (`bazel run`).
 Attributes:
 
 - `entry_point` (label, required): path to the main JS/TS file to execute.
-- `node_modules` (label, optional): Bun/npm package files in runfiles.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, made available in runfiles.
 - `data` (label_list, optional): additional runtime files.
 - `working_dir` (string, default: `"workspace"`, values: `"workspace" | "entry_point"`): runtime working directory.
 
@@ -22,7 +22,7 @@ Attributes:
 - `entry_point` (label, required): path to the main JS/TS file.
 - `watch_mode` (string, default: `"watch"`, values: `"watch" | "hot"`): Bun live-reload mode.
 - `restart_on` (label_list, optional): files that trigger full process restart when changed.
-- `node_modules` (label, optional): Bun/npm package files in runfiles.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, made available in runfiles.
 - `data` (label_list, optional): additional runtime files for dev process.
 - `working_dir` (string, default: `"workspace"`, values: `"workspace" | "entry_point"`): runtime working directory.
 
@@ -38,7 +38,7 @@ Attributes:
 
 - `script` (string, required): package script name passed to `bun run <script>`.
 - `package_json` (label, required): `package.json` file containing the named script.
-- `node_modules` (label, optional): Bun/npm package files in runfiles.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, made available in runfiles.
 - `data` (label_list, optional): additional runtime files for the script.
 - `working_dir` (string, default: `"package"`, values: `"workspace" | "package"`): runtime working directory. The default is a good fit for Vite and similar package-script based tools.
 
@@ -49,7 +49,7 @@ Bundles one or more JS/TS entry points with Bun build.
 Attributes:
 
 - `entry_points` (label_list, required): entry files to bundle.
-- `node_modules` (label, optional): Bun/npm package files for resolution.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, used for package resolution.
 - `deps` (label_list, optional): source/library dependencies for transitive inputs.
 - `data` (label_list, optional): additional non-source files needed during bundling.
 - `target` (string, default: `"browser"`, values: `"browser" | "node" | "bun"`): Bun build target.
@@ -65,7 +65,7 @@ Runs Bun tests as a Bazel test target (`bazel test`).
 Attributes:
 
 - `srcs` (label_list, required): test source files passed to `bun test`.
-- `node_modules` (label, optional): Bun/npm package files in runfiles.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, made available in runfiles.
 - `deps` (label_list, optional): library dependencies required by tests.
 - `data` (label_list, optional): additional runtime files needed by tests.
 

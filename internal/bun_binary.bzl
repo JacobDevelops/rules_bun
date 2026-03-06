@@ -79,7 +79,7 @@ Use this rule for non-test scripts and CLIs that should run via `bazel run`.
             doc = "Path to the main JS/TS file to execute.",
         ),
         "node_modules": attr.label(
-            doc = "Optional label providing Bun/npm package files in runfiles.",
+            doc = "Optional label providing package files from a `node_modules` tree, typically produced by `bun_install`, in runfiles.",
         ),
         "data": attr.label_list(
             allow_files = True,

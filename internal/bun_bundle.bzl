@@ -72,7 +72,7 @@ Each entry point produces one output JavaScript artifact.
             doc = "Entry files to bundle.",
         ),
         "node_modules": attr.label(
-            doc = "Optional label providing Bun/npm package files for resolution.",
+            doc = "Optional label providing package files from a `node_modules` tree, typically produced by `bun_install`, for package resolution.",
         ),
         "deps": attr.label_list(
             doc = "Source/library dependencies that provide transitive inputs.",

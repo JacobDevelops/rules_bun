@@ -49,3 +49,38 @@ sh_test(
     args = ["$(location :vite_dev_server)"],
     data = [":vite_dev_server"],
 )
+
+bun_script(
+    name = "vite_monorepo_app_a_dev_server",
+    script = "dev",
+    package_json = "vite_monorepo/apps/app-a/package.json",
+    node_modules = "@script_test_vite_monorepo_node_modules//:node_modules",
+    data = [
+        "vite_monorepo/apps/app-a/index.html",
+        "vite_monorepo/apps/app-a/main.js",
+    ],
+)
+
+bun_script(
+    name = "vite_monorepo_app_b_dev_server",
+    script = "dev",
+    package_json = "vite_monorepo/apps/app-b/package.json",
+    node_modules = "@script_test_vite_monorepo_node_modules//:node_modules",
+    data = [
+        "vite_monorepo/apps/app-b/index.html",
+        "vite_monorepo/apps/app-b/main.js",
+    ],
+)
+
+sh_test(
+    name = "bun_script_vite_monorepo_apps_test",
+    srcs = ["run_vite_monorepo_apps.sh"],
+    args = [
+        "$(location :vite_monorepo_app_a_dev_server)",
+        "$(location :vite_monorepo_app_b_dev_server)",
+    ],
+    data = [
+        ":vite_monorepo_app_a_dev_server",
+        ":vite_monorepo_app_b_dev_server",
+    ],
+)

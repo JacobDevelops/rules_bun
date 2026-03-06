@@ -39,7 +39,8 @@ The public entrypoint for rule authors and users is `@rules_bun//bun:defs.bzl`.
 Reference documentation:
 
 - Published docs site: https://eriyc.github.io/rules_bun/
-- Generated rule reference: [docs/rules.md](docs/rules.md)
+- Generated build rule reference: [docs/rules.md](docs/rules.md)
+- `bun_install` extension docs: [docs/bun_install.md](docs/bun_install.md)
 - Docs index: [docs/index.md](docs/index.md)
 
 To refresh generated rule docs:
@@ -83,16 +84,21 @@ register_toolchains(
 If you want Bazel-managed dependency installation, also add the module
 extension for `bun_install`:
 
+`bun_install` runs `bun install`, not `npm install`. In the example below,
+`bun_deps` is just the Bazel repository name for the generated
+`node_modules` tree. See [docs/bun_install.md](docs/bun_install.md) for the
+full extension reference.
+
 ```starlark
 bun_install_ext = use_extension("@rules_bun//bun:extensions.bzl", "bun_install")
 
 bun_install_ext.install(
-    name = "npm",
+    name = "bun_deps",
     package_json = "//:package.json",
     bun_lockfile = "//:bun.lock",
 )
 
-use_repo(bun_install_ext, "npm")
+use_repo(bun_install_ext, "bun_deps")
 ```
 
 ## Legacy WORKSPACE usage
@@ -136,7 +142,7 @@ bun_script(
     name = "web_dev",
     script = "dev",
     package_json = "package.json",
-    node_modules = "@npm//:node_modules",
+    node_modules = "@bun_deps//:node_modules",
     data = glob([
         "src/**",
         "static/**",
@@ -148,7 +154,8 @@ bun_script(
 ```
 
 When `node_modules` is provided, executables from `node_modules/.bin` are added
-to `PATH`.
+to `PATH`. This label typically comes from `bun_install`, which still produces a
+standard `node_modules/` directory.
 
 ### `bun_dev` for local development
 
@@ -189,6 +196,7 @@ Representative example docs:
 
 - [examples/basic/README.md](examples/basic/README.md)
 - [examples/workspace/README.md](examples/workspace/README.md)
+- [examples/vite_monorepo/README.md](examples/vite_monorepo/README.md)
 
 To validate the ruleset locally:
 
