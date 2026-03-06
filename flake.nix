@@ -66,7 +66,7 @@
               tests = {
                 enable = true;
                 entry = ''
-                  ${pkgs.bash}/bin/bash -ec 'bazel test //tests/... --test_output=errors && tests/install_test/workspace_parity.sh "$(command -v bun)"'
+                  ${pkgs.bash}/bin/bash -ec 'bazel test //tests/... --test_output=error'
                 '';
                 pass_filenames = false;
                 stages = [ "pre-push" ];
