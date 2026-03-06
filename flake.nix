@@ -66,7 +66,7 @@
               tests = {
                 enable = true;
                 entry = ''
-                  ${pkgs.bash}/bin/bash -ec 'bazel test //tests/... --test_output=error'
+                  ${pkgs.bash}/bin/bash -ec 'bazel test //tests/...'
                 '';
                 pass_filenames = false;
                 stages = [ "pre-push" ];
