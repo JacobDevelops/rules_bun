@@ -92,9 +92,40 @@ find_node_modules() {{
     return 1
 }}
 
-if [[ -n "${{install_repo_root}}" && -d "${{install_repo_root}}/${{package_rel_dir}}/node_modules" ]]; then
+find_install_repo_node_modules() {{
+    local repo_root="$1"
+    local rel_dir="$2"
+    local candidate="${{rel_dir}}"
+
+    while [[ -n "${{candidate}}" ]]; do
+        if [[ -d "${{repo_root}}/${{candidate}}/node_modules" ]]; then
+            echo "${{repo_root}}/${{candidate}}/node_modules"
+            return 0
+        fi
+
+        if [[ "${{candidate}}" != */* ]]; then
+            break
+        fi
+
+        candidate="${{candidate#*/}}"
+    done
+
+    if [[ -d "${{repo_root}}/node_modules" ]]; then
+        echo "${{repo_root}}/node_modules"
+        return 0
+    fi
+
+    return 1
+}}
+
+resolved_install_node_modules=""
+if [[ -n "${{install_repo_root}}" ]]; then
+    resolved_install_node_modules="$(find_install_repo_node_modules "${{install_repo_root}}" "${{package_rel_dir}}" || true)"
+fi
+
+if [[ -n "${{resolved_install_node_modules}}" ]]; then
     rm -rf "${{runtime_package_dir}}/node_modules"
-    ln -s "${{install_repo_root}}/${{package_rel_dir}}/node_modules" "${{runtime_package_dir}}/node_modules"
+    ln -s "${{resolved_install_node_modules}}" "${{runtime_package_dir}}/node_modules"
 else
     resolved_node_modules="$(find_node_modules "${{runtime_package_dir}}" "${{runtime_workspace}}" || true)"
     if [[ -n "${{resolved_node_modules}}" && "${{resolved_node_modules}}" != "${{runtime_package_dir}}/node_modules" ]]; then

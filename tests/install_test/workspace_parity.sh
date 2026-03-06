@@ -403,16 +403,16 @@ if ! diff -u "${plain_manifest}" "${bazel_manifest}"; then
   exit 1
 fi
 
-rm -rf "${plain_dir}/packages/web/dist"
-"${bun_path}" run --cwd "${plain_dir}/packages/web" build -- --emptyOutDir >/dev/null
+plain_dist_dir="${workdir}/plain-dist"
+bazel_dist_dir="${workdir}/bazel-dist"
+
+rm -rf "${plain_dist_dir}" "${bazel_dist_dir}"
+"${bun_path}" run --cwd "${plain_dir}/packages/web" build -- --emptyOutDir --outDir "${plain_dist_dir}" >/dev/null
 
 (
   cd "${bazel_dir}"
-  bazel run //:web_build -- --emptyOutDir >/dev/null
+  bazel run //:web_build -- --emptyOutDir --outDir "${bazel_dist_dir}" >/dev/null
 )
-
-plain_dist_dir="${plain_dir}/packages/web/dist"
-bazel_dist_dir="${bazel_dir}/bazel-bin/web_build.runfiles/_main/packages/web/dist"
 
 if [[ ! -d ${plain_dist_dir} ]]; then
   echo "Plain Bun Vite build did not produce output" >&2

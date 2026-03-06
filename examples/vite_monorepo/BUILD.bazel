@@ -4,6 +4,16 @@ load("@rules_bun//bun:defs.bzl", "bun_script")
 load("@rules_multirun//:defs.bzl", "multirun")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "README.md",
+    "package.json",
+    "bun.lock",
+    "apps/app-a/package.json",
+    "apps/app-b/package.json",
+])
+
 multirun(
     name = "dev",
     commands = [
