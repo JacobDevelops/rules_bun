@@ -9,16 +9,16 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1772613315,
-        "narHash": "sha256-RlPTOsyfVwuwEzvaMpwS+giOqQa6KQXMuSHyh1bctjk=",
-        "ref": "v1.0.5",
-        "rev": "e445e49baf8b44b385108cd4f26a14d8ccf9fd35",
-        "revCount": 35,
+        "lastModified": 1772815059,
+        "narHash": "sha256-9Mn8t/a7b43omtmKRsF0HmFpCkNpTsvYEq0y85KLL5s=",
+        "ref": "v2.0.1",
+        "rev": "80cc529de7060e079d89a69d8daaf0347b53d8f9",
+        "revCount": 43,
         "type": "git",
         "url": "https://git.dgren.dev/eric/nix-flake-lib"
       },
       "original": {
-        "ref": "v1.0.5",
+        "ref": "v2.0.1",
         "type": "git",
         "url": "https://git.dgren.dev/eric/nix-flake-lib"
       }
