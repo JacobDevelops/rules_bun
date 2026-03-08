@@ -192,7 +192,7 @@
   "moduleExtensions": {
     "//bun:extensions.bzl%bun": {
       "general": {
-        "bzlTransitiveDigest": "64B4fTkEHdAlieIOkE/Wi2M/R9lMNZhFxeI1eXEFHRs=",
+        "bzlTransitiveDigest": "eSFVebwDN61an1dp3505njvMKN961HH+iY2tK6fEBQQ=",
         "usagesDigest": "/0BcCMA6AOzLhQaRK6DquxrCfpPHJUjSUaFz4zmQrsM=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
@@ -253,8 +253,8 @@
     },
     "//bun:extensions.bzl%bun_install": {
       "general": {
-        "bzlTransitiveDigest": "64B4fTkEHdAlieIOkE/Wi2M/R9lMNZhFxeI1eXEFHRs=",
-        "usagesDigest": "d+DGTyl4FpB6Ygb/R/V5knxm9bGYZKO223wMX1Q6R6w=",
+        "bzlTransitiveDigest": "eSFVebwDN61an1dp3505njvMKN961HH+iY2tK6fEBQQ=",
+        "usagesDigest": "f9pNm3AOxJDZmpHhL2vrrCo23IW33im/l/VYCTW2BWM=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
@@ -273,6 +273,15 @@
             "attributes": {
               "package_json": "@@//tests/script_test:vite_monorepo/package.json",
               "bun_lockfile": "@@//tests/script_test:vite_monorepo/bun.lock",
+              "install_inputs": [],
+              "isolated_home": true
+            }
+          },
+          "script_test_paraglide_monorepo_node_modules": {
+            "repoRuleId": "@@//internal:bun_install.bzl%bun_install_repository",
+            "attributes": {
+              "package_json": "@@//tests/script_test:paraglide_monorepo/package.json",
+              "bun_lockfile": "@@//tests/script_test:paraglide_monorepo/bun.lock",
               "install_inputs": [],
               "isolated_home": true
             }

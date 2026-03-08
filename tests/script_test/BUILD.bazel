@@ -84,3 +84,62 @@ sh_test(
         ":vite_monorepo_app_b_dev_server",
     ],
 )
+
+bun_script(
+    name = "paraglide_monorepo_app_a_build",
+    script = "build:app-a",
+    package_json = "paraglide_monorepo/package.json",
+    node_modules = "@script_test_paraglide_monorepo_node_modules//:node_modules",
+    data = [
+        "paraglide_monorepo/scripts/build-app-a.mjs",
+        "paraglide_monorepo/scripts/build-app-b.mjs",
+        "paraglide_monorepo/packages/i18n/package.json",
+        "paraglide_monorepo/packages/i18n/project.inlang/settings.json",
+        "paraglide_monorepo/packages/i18n/messages/en.json",
+        "paraglide_monorepo/packages/i18n/messages/sv.json",
+        "paraglide_monorepo/packages/app-a/package.json",
+        "paraglide_monorepo/packages/app-a/index.html",
+        "paraglide_monorepo/packages/app-a/main.js",
+        "paraglide_monorepo/packages/app-a/vite.config.js",
+        "paraglide_monorepo/packages/app-b/package.json",
+        "paraglide_monorepo/packages/app-b/index.html",
+        "paraglide_monorepo/packages/app-b/main.js",
+        "paraglide_monorepo/packages/app-b/vite.config.js",
+    ],
+)
+
+bun_script(
+    name = "paraglide_monorepo_app_b_build",
+    script = "build:app-b",
+    package_json = "paraglide_monorepo/package.json",
+    node_modules = "@script_test_paraglide_monorepo_node_modules//:node_modules",
+    data = [
+        "paraglide_monorepo/scripts/build-app-a.mjs",
+        "paraglide_monorepo/scripts/build-app-b.mjs",
+        "paraglide_monorepo/packages/i18n/package.json",
+        "paraglide_monorepo/packages/i18n/project.inlang/settings.json",
+        "paraglide_monorepo/packages/i18n/messages/en.json",
+        "paraglide_monorepo/packages/i18n/messages/sv.json",
+        "paraglide_monorepo/packages/app-a/package.json",
+        "paraglide_monorepo/packages/app-a/index.html",
+        "paraglide_monorepo/packages/app-a/main.js",
+        "paraglide_monorepo/packages/app-a/vite.config.js",
+        "paraglide_monorepo/packages/app-b/package.json",
+        "paraglide_monorepo/packages/app-b/index.html",
+        "paraglide_monorepo/packages/app-b/main.js",
+        "paraglide_monorepo/packages/app-b/vite.config.js",
+    ],
+)
+
+sh_test(
+    name = "bun_script_paraglide_monorepo_build_test",
+    srcs = ["run_paraglide_monorepo_builds.sh"],
+    args = [
+        "$(location :paraglide_monorepo_app_a_build)",
+        "$(location :paraglide_monorepo_app_b_build)",
+    ],
+    data = [
+        ":paraglide_monorepo_app_a_build",
+        ":paraglide_monorepo_app_b_build",
+    ],
+)

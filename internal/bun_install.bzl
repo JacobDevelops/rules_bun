@@ -96,6 +96,53 @@ def _workspace_patterns(repository_ctx, package_json):
 
     return patterns
 
+def _validate_catalog_shape(field, value):
+    if value == None:
+        return
+
+    if type(value) != type({}):
+        fail("bun_install: `{}` must be an object".format(field))
+
+    if field not in ["catalogs", "workspaces.catalogs"]:
+        return
+
+    for name, catalog in value.items():
+        if type(name) != type(""):
+            fail("bun_install: `catalogs` keys must be strings, got {}".format(type(name)))
+        if type(catalog) != type({}):
+            fail("bun_install: `catalogs.{}` must be an object".format(name))
+
+def _copy_json_value(value):
+    return json.decode(json.encode(value))
+
+def _normalized_root_manifest(repository_ctx, package_json):
+    manifest = json.decode(repository_ctx.read(package_json))
+    workspaces = manifest.get("workspaces")
+
+    for field in ["catalog", "catalogs"]:
+        manifest_value = manifest.get(field)
+        _validate_catalog_shape(field, manifest_value)
+
+        if type(workspaces) != type({}):
+            continue
+
+        workspace_value = workspaces.get(field)
+        _validate_catalog_shape("workspaces.{}".format(field), workspace_value)
+
+        if workspace_value == None:
+            continue
+
+        if manifest_value == None:
+            manifest[field] = _copy_json_value(workspace_value)
+            continue
+
+        if manifest_value != workspace_value:
+            fail(
+                "bun_install: `{}` conflicts with `workspaces.{}`; use one source of truth or keep both values identical".format(field, field),
+            )
+
+    return json.encode(manifest)
+
 def _materialize_workspace_packages(repository_ctx, package_json):
     package_root = package_json.dirname
     package_root_str = str(package_root)
@@ -187,7 +234,7 @@ def _bun_install_repository_impl(repository_ctx):
     if lockfile_name not in ["bun.lock", "bun.lockb"]:
         lockfile_name = "bun.lock"
 
-    repository_ctx.file("package.json", repository_ctx.read(package_json))
+    repository_ctx.file("package.json", _normalized_root_manifest(repository_ctx, package_json))
     repository_ctx.symlink(bun_lockfile, lockfile_name)
     _materialize_install_inputs(repository_ctx, package_json)
     _materialize_workspace_packages(repository_ctx, package_json)

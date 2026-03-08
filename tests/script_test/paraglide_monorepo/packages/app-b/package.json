@@ -1,0 +1,14 @@
+{
+  "name": "paraglide-monorepo-app-b",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@workspace/i18n": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "catalog:"
+  }
+}
