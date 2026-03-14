@@ -39,3 +39,30 @@ sh_test(
     args = ["$(location :compat_devserver)"],
     data = [":compat_devserver"],
 )
+
+js_run_devserver(
+    name = "compat_devserver_with_package_json",
+    tool = ":compat_bin",
+    package_json = "app/package.json",
+    working_dir = "package",
+)
+
+js_run_devserver(
+    name = "compat_devserver_with_package_dir_hint",
+    tool = ":compat_bin",
+    package_dir_hint = "app",
+    working_dir = "package",
+)
+
+sh_test(
+    name = "js_run_devserver_workspace_shape_test",
+    srcs = ["verify_workspace_shape.sh"],
+    args = [
+        "$(location :compat_devserver_with_package_json)",
+        "$(location :compat_devserver_with_package_dir_hint)",
+    ],
+    data = [
+        ":compat_devserver_with_package_json",
+        ":compat_devserver_with_package_dir_hint",
+    ],
+)

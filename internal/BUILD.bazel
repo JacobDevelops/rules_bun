@@ -18,6 +18,27 @@ exports_files([
     "workspace.bzl",
 ])
 
+filegroup(
+    name = "repo_runtime_files",
+    srcs = [
+        "BUILD.bazel",
+        "bun_binary.bzl",
+        "bun_build_support.bzl",
+        "bun_bundle.bzl",
+        "bun_command.bzl",
+        "bun_compile.bzl",
+        "bun_dev.bzl",
+        "bun_install.bzl",
+        "bun_script.bzl",
+        "bun_test.bzl",
+        "js_compat.bzl",
+        "js_library.bzl",
+        "js_run_devserver.bzl",
+        "workspace.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "bun_command_bzl",
     srcs = ["bun_command.bzl"],

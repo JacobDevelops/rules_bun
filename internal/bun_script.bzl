@@ -53,6 +53,7 @@ exec "${bun_bin}" "${bun_args[@]}" "$@"
             package_dir_hint = package_json.dirname or ".",
             package_json_short_path = package_json.short_path,
             primary_source_short_path = package_json.short_path,
+            install_metadata_short_path = workspace_info.install_metadata_file.short_path if workspace_info.install_metadata_file else "",
             working_dir_mode = ctx.attr.working_dir,
         ) + command,
     )

@@ -165,3 +165,54 @@ sh_test(
     args = ["$(location :workspace_filtered_script)"],
     data = [":workspace_filtered_script"],
 )
+
+bun_script(
+    name = "workspace_parallel_script",
+    script = "say",
+    package_json = "workspace_run/package.json",
+    data = [
+        "workspace_run/packages/pkg-a/package.json",
+        "workspace_run/packages/pkg-a/say.ts",
+        "workspace_run/packages/pkg-b/package.json",
+        "workspace_run/packages/pkg-b/say.ts",
+    ],
+    workspaces = True,
+    execution_mode = "parallel",
+)
+
+sh_test(
+    name = "bun_script_workspace_parallel_test",
+    srcs = ["run_workspace_parallel.sh"],
+    args = ["$(location :workspace_parallel_script)"],
+    data = [":workspace_parallel_script"],
+)
+
+bun_script(
+    name = "workspace_flagged_script",
+    script = "say",
+    package_json = "workspace_run/package.json",
+    data = [
+        "workspace_run/packages/pkg-a/package.json",
+        "workspace_run/packages/pkg-a/say.ts",
+        "workspace_run/packages/pkg-b/package.json",
+        "workspace_run/packages/pkg-b/say.ts",
+    ],
+    workspaces = True,
+    execution_mode = "parallel",
+    no_exit_on_error = True,
+    shell = "system",
+)
+
+sh_test(
+    name = "bun_script_workspace_flag_shape_test",
+    srcs = ["verify_launcher_flags.sh"],
+    args = [
+        "$(location :workspace_flagged_script)",
+        "--workspaces",
+        "--parallel",
+        "--no-exit-on-error",
+        "--shell",
+        "system",
+    ],
+    data = [":workspace_flagged_script"],
+)

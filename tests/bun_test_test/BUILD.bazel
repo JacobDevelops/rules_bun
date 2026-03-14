@@ -20,7 +20,6 @@ bun_test(
     timeout_ms = 250,
     update_snapshots = True,
     rerun_each = 2,
-    retry = 3,
     concurrent = True,
     randomize = True,
     seed = 7,
@@ -30,6 +29,12 @@ bun_test(
     coverage = True,
     coverage_reporters = ["lcov"],
     test_flags = ["--only-failures"],
+)
+
+bun_test(
+    name = "configured_retry_suite",
+    srcs = ["passing.test.ts"],
+    retry = 3,
 )
 
 sh_test(
@@ -63,6 +68,12 @@ sh_test(
 sh_test(
     name = "bun_test_configured_suite_shape_test",
     srcs = ["configured_suite_shape.sh"],
-    args = ["$(location :configured_suite)"],
-    data = [":configured_suite"],
+    args = [
+        "$(location :configured_suite)",
+        "$(location :configured_retry_suite)",
+    ],
+    data = [
+        ":configured_suite",
+        ":configured_retry_suite",
+    ],
 )

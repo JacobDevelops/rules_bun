@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-nix_cmd="${NIX:-/nix/var/nix/profiles/default/bin/nix}"
-if [[ ! -x ${nix_cmd} ]]; then
-  nix_cmd="$(command -v nix || true)"
-fi
-if [[ -z ${nix_cmd} || ! -x ${nix_cmd} ]]; then
-  echo "nix is required to launch bazel from the repo dev shell" >&2
+if command -v bazel >/dev/null 2>&1; then
+  bazel_bin="$(command -v bazel)"
+elif command -v bazelisk >/dev/null 2>&1; then
+  bazel_bin="$(command -v bazelisk)"
+else
+  echo "bazel or bazelisk is required on PATH" >&2
   exit 1
 fi
+
+bun_path="${1:-bun}"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 rules_bun_root="$(cd "${script_dir}/../.." && pwd -P)"
@@ -35,10 +37,7 @@ import isNumber from "is-number";
 console.log(`compat:${isNumber(42)}`);
 JS
 
-(
-  cd "${rules_bun_root}" &&
-    "${nix_cmd}" develop -c bash -lc 'bun install --cwd "$1" >/dev/null' bash "${fixture_dir}"
-)
+"${bun_path}" install --cwd "${fixture_dir}" >/dev/null
 rm -rf "${fixture_dir}/node_modules"
 
 cat >"${fixture_dir}/MODULE.bazel" <<EOF
@@ -100,8 +99,8 @@ js_binary(
 EOF
 
 output="$(
-  cd "${rules_bun_root}" &&
-    "${nix_cmd}" develop -c bash -lc 'cd "$1" && bazel run //:app' bash "${fixture_dir}"
+  cd "${fixture_dir}" &&
+    "${bazel_bin}" run //:app
 )"
 
 if [[ ${output} != *"compat:true"* ]]; then
@@ -110,8 +109,8 @@ if [[ ${output} != *"compat:true"* ]]; then
 fi
 
 query_output="$(
-  cd "${rules_bun_root}" &&
-    "${nix_cmd}" develop -c bash -lc 'cd "$1" && bazel query //:npm__is_number' bash "${fixture_dir}"
+  cd "${fixture_dir}" &&
+    "${bazel_bin}" query //:npm__is_number
 )"
 if ! grep -Fxq "//:npm__is_number" <<<"${query_output}"; then
   echo "expected npm_link_all_packages to create //:npm__is_number" >&2

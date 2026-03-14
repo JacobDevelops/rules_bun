@@ -4,6 +4,7 @@ test_suite(
     name = "examples_test",
     tests = [
         ":examples_basic_run_e2e_test",
+        ":examples_basic_hot_restart_shape_test",
         ":examples_workspace_bundle_e2e_test",
         ":examples_workspace_catalog_shape_test",
         ":examples_vite_monorepo_catalog_shape_test",
@@ -29,6 +30,13 @@ sh_test(
     srcs = ["examples_basic_run_e2e_test.sh"],
     args = ["$(location //examples/basic:web_dev)"],
     data = ["//examples/basic:web_dev"],
+)
+
+sh_test(
+    name = "examples_basic_hot_restart_shape_test",
+    srcs = ["examples_basic_hot_restart_shape_test.sh"],
+    args = ["$(location //examples/basic:web_dev_hot_restart)"],
+    data = ["//examples/basic:web_dev_hot_restart"],
 )
 
 sh_test(

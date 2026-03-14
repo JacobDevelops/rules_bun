@@ -7,6 +7,16 @@ exports_files([
     "repositories.bzl",
 ])
 
+filegroup(
+    name = "repo_runtime_files",
+    srcs = [
+        "BUILD.bazel",
+        "extensions.bzl",
+        "repositories.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "extensions_bzl",
     srcs = ["extensions.bzl"],

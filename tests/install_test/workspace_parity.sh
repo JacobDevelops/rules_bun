@@ -3,8 +3,12 @@ set -euo pipefail
 
 bun_path="${1:-bun}"
 
-if ! command -v bazel >/dev/null 2>&1; then
-  echo "bazel is required on PATH" >&2
+if command -v bazel >/dev/null 2>&1; then
+  bazel_cmd=(bazel)
+elif command -v bazelisk >/dev/null 2>&1; then
+  bazel_cmd=(bazelisk)
+else
+  echo "bazel or bazelisk is required on PATH" >&2
   exit 1
 fi
 
@@ -199,12 +203,12 @@ chmod +x "${bazel_dir}/node_modules_smoke_test.sh"
 
 (
   cd "${bazel_dir}"
-  bazel build @node_modules//:node_modules >/dev/null
-  bazel test //:node_modules_smoke_test >/dev/null
-  bazel run //:web_build -- --emptyOutDir >/dev/null
+  "${bazel_cmd[@]}" build @node_modules//:node_modules >/dev/null
+  "${bazel_cmd[@]}" test //:node_modules_smoke_test >/dev/null
+  "${bazel_cmd[@]}" run //:web_build -- --emptyOutDir >/dev/null
 )
 
-output_base="$(cd "${bazel_dir}" && bazel info output_base)"
+output_base="$(cd "${bazel_dir}" && "${bazel_cmd[@]}" info output_base)"
 bazel_repo_dir="$(find "${output_base}/external" -maxdepth 1 -type d -name '*+node_modules' | head -n 1)"
 
 if [[ -z ${bazel_repo_dir} ]]; then
@@ -238,6 +242,8 @@ root = sys.argv[1]
 
 def include(rel):
     if rel == "node_modules" or rel.startswith("node_modules/"):
+        if rel == "node_modules/.rules_bun" or rel.startswith("node_modules/.rules_bun/"):
+            return False
         return True
     if rel.startswith("packages/") and "/node_modules" in rel:
         return True
@@ -283,6 +289,8 @@ root = sys.argv[1]
 
 def include(rel):
     if rel == "node_modules" or rel.startswith("node_modules/"):
+        if rel == "node_modules/.rules_bun" or rel.startswith("node_modules/.rules_bun/"):
+            return False
         return True
     if rel.startswith("packages/") and "/node_modules" in rel:
         return True
@@ -343,6 +351,8 @@ for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=Fals
     for name in dirnames + filenames:
         full = os.path.join(dirpath, name)
         rel = os.path.join(rel_dir, name) if rel_dir else name
+        if rel == ".rules_bun" or rel.startswith(".rules_bun/"):
+            continue
         st = os.lstat(full)
         mode = st.st_mode
         if stat.S_ISLNK(mode):
@@ -379,6 +389,8 @@ for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=Fals
     for name in dirnames + filenames:
         full = os.path.join(dirpath, name)
         rel = os.path.join(rel_dir, name) if rel_dir else name
+        if rel == ".rules_bun" or rel.startswith(".rules_bun/"):
+            continue
         st = os.lstat(full)
         mode = st.st_mode
         if stat.S_ISLNK(mode):
@@ -411,7 +423,7 @@ rm -rf "${plain_dist_dir}" "${bazel_dist_dir}"
 
 (
   cd "${bazel_dir}"
-  bazel run //:web_build -- --emptyOutDir --outDir "${bazel_dist_dir}" >/dev/null
+  "${bazel_cmd[@]}" run //:web_build -- --emptyOutDir --outDir "${bazel_dist_dir}" >/dev/null
 )
 
 if [[ ! -d ${plain_dist_dir} ]]; then

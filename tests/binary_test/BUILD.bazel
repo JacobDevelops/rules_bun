@@ -93,3 +93,27 @@ sh_test(
     args = ["$(location :runtime_flag_bin)"],
     data = [":runtime_flag_bin"],
 )
+
+bun_binary(
+    name = "configured_launcher_bin",
+    entry_point = "hello.ts",
+    node_modules = "@script_test_vite_node_modules//:node_modules",
+    smol = True,
+    conditions = [
+        "browser",
+        "development",
+    ],
+    install_mode = "force",
+    run_flags = [
+        "--hot",
+        "--console-depth",
+        "4",
+    ],
+)
+
+sh_test(
+    name = "bun_binary_configured_launcher_shape_test",
+    srcs = ["verify_configured_launcher_shape.sh"],
+    args = ["$(location :configured_launcher_bin)"],
+    data = [":configured_launcher_bin"],
+)

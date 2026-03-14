@@ -31,6 +31,7 @@ def _js_run_devserver_impl(ctx):
         is_executable = True,
         content = render_workspace_setup(
             bun_short_path = bun_bin.short_path,
+            install_metadata_short_path = workspace_info.install_metadata_file.short_path if workspace_info.install_metadata_file else "",
             primary_source_short_path = package_json.short_path if package_json else tool_default_info.files_to_run.executable.short_path,
             package_json_short_path = package_json.short_path if package_json else "",
             package_dir_hint = ctx.attr.package_dir_hint,

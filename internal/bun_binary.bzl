@@ -40,6 +40,7 @@ exec "${bun_bin}" "${bun_args[@]}" "$@"
         is_executable = True,
         content = render_workspace_setup(
             bun_short_path = bun_bin.short_path,
+            install_metadata_short_path = workspace_info.install_metadata_file.short_path if workspace_info.install_metadata_file else "",
             primary_source_short_path = entry_point.short_path,
             working_dir_mode = ctx.attr.working_dir,
         ) + command,

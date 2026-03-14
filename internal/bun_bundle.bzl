@@ -25,8 +25,6 @@ def _bun_bundle_impl(ctx):
         add_bun_build_common_flags(args, ctx.attr)
         args.add("--outfile")
         args.add(output.path)
-        if ctx.attr.sourcemap:
-            args.add("--sourcemap")
         args.add(entry.path)
 
         ctx.actions.run(

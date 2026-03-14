@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "sources": ["tests/bundle_test/main.ts"],
+  "sourcesContent": [
+    "export function greet(name: string): string {\n  return `Hello ${name}`;\n}\n\nconsole.log(greet(\"bundle\"));\n"
+  ],
+  "mappings": ";AAAO,SAAS,KAAK,CAAC,MAAsB;AAAA,EAC1C,OAAO,SAAS;AAAA;AAGlB,QAAQ,IAAI,MAAM,QAAQ,CAAC;",
+  "debugId": "A86FEBA7FCC390B664756E2164756E21",
+  "names": []
+}

@@ -29,6 +29,11 @@ if [[ -n "__PACKAGE_JSON_SHORT_PATH__" ]]; then
     package_json="${runfiles_dir}/_main/__PACKAGE_JSON_SHORT_PATH__"
 fi
 package_rel_dir_hint="__PACKAGE_DIR_HINT__"
+install_root_rel_dir_hint="__INSTALL_ROOT_REL_DIR__"
+install_metadata=""
+if [[ -n "__INSTALL_METADATA_SHORT_PATH__" ]]; then
+    install_metadata="${runfiles_dir}/_main/__INSTALL_METADATA_SHORT_PATH__"
+fi
 working_dir_mode="__WORKING_DIR_MODE__"
 
 normalize_rel_dir() {
@@ -109,6 +114,27 @@ find_working_rel_dir_for_path() {
     done
 
     rel_dir_from_abs_path "$(dirname "${path}")"
+}
+
+strip_rel_prefix() {
+    local child
+    child="$(normalize_rel_dir "$1")"
+    local parent
+    parent="$(normalize_rel_dir "$2")"
+
+    if [[ "${parent}" == "." ]]; then
+        echo "${child}"
+        return 0
+    fi
+    if [[ "${child}" == "${parent}" ]]; then
+        echo "."
+        return 0
+    fi
+    if [[ "${child}" == "${parent}/"* ]]; then
+        echo "${child#"${parent}/"}"
+        return 0
+    fi
+    echo "${child}"
 }
 
 select_primary_node_modules() {
@@ -248,6 +274,15 @@ stage_workspace_view() {
 
     materialize_package_path "${source_root}" "${destination_root}" "${package_rel_dir}"
     materialize_directory_entries "${source_root}/${package_rel_dir}" "${destination_root}/${package_rel_dir}"
+}
+
+materialize_tree_contents() {
+    local source_root="$1"
+    local destination_root="$2"
+
+    rm -rf "${destination_root}"
+    mkdir -p "${destination_root}"
+    cp -RL "${source_root}/." "${destination_root}"
 }
 
 build_workspace_package_map() {
@@ -414,12 +449,18 @@ mirror_install_repo_workspace_node_modules() {
 build_runtime_path() {
     local workspace_dir="$1"
     local package_dir="$2"
+    local install_root_dir="$3"
     local entries=()
 
-    if [[ -d "${package_dir}/node_modules/.bin" ]]; then
-        entries+=("${package_dir}/node_modules/.bin")
+    if [[ -d "${install_root_dir}/node_modules/.bin" ]]; then
+        entries+=("${install_root_dir}/node_modules/.bin")
     fi
-    if [[ -d "${workspace_dir}/node_modules/.bin" && "${workspace_dir}/node_modules/.bin" != "${package_dir}/node_modules/.bin" ]]; then
+    if [[ -d "${package_dir}/node_modules/.bin" ]]; then
+        if [[ "${package_dir}/node_modules/.bin" != "${install_root_dir}/node_modules/.bin" ]]; then
+            entries+=("${package_dir}/node_modules/.bin")
+        fi
+    fi
+    if [[ -d "${workspace_dir}/node_modules/.bin" && "${workspace_dir}/node_modules/.bin" != "${package_dir}/node_modules/.bin" && "${workspace_dir}/node_modules/.bin" != "${install_root_dir}/node_modules/.bin" ]]; then
         entries+=("${workspace_dir}/node_modules/.bin")
     fi
     if [[ -n "${PATH:-}" ]]; then
@@ -481,8 +522,66 @@ resolve_execution_rel_dir() {
     esac
 }
 
+resolve_install_root_rel_dir() {
+    if [[ -n "${install_metadata}" && -f "${install_metadata}" ]]; then
+        local resolved_from_metadata=""
+        resolved_from_metadata="$(
+            python3 - "${install_metadata}" "${package_rel_dir}" <<'PY'
+import json
+import sys
+
+install_metadata_path = sys.argv[1]
+package_rel_dir = sys.argv[2]
+
+try:
+    with open(install_metadata_path, "r", encoding="utf-8") as install_metadata_file:
+        workspace_package_dirs = json.load(install_metadata_file).get("workspace_package_dirs", [])
+except Exception:
+    workspace_package_dirs = []
+
+normalized_package_rel_dir = package_rel_dir.strip("./") or "."
+matches = []
+for workspace_package_dir in workspace_package_dirs:
+    normalized_workspace_package_dir = workspace_package_dir.strip("./")
+    if not normalized_workspace_package_dir:
+        continue
+    if normalized_package_rel_dir == normalized_workspace_package_dir:
+        matches.append((len(normalized_workspace_package_dir), "."))
+        continue
+    suffix = "/" + normalized_workspace_package_dir
+    if normalized_package_rel_dir.endswith(suffix):
+        prefix = normalized_package_rel_dir[:-len(suffix)].strip("/") or "."
+        matches.append((len(normalized_workspace_package_dir), prefix))
+
+if matches:
+    matches.sort(reverse = True)
+    print(matches[0][1])
+PY
+        )"
+        if [[ -n "${resolved_from_metadata}" ]]; then
+            echo "${resolved_from_metadata}"
+            return 0
+        fi
+    fi
+    if [[ -n "${install_root_rel_dir_hint}" && "${install_root_rel_dir_hint}" != "." ]]; then
+        normalize_rel_dir "${install_root_rel_dir_hint}"
+        return 0
+    fi
+    if [[ -n "${package_json}" ]]; then
+        find_package_rel_dir_for_path "${package_json}"
+        return 0
+    fi
+    if [[ -n "${primary_source}" ]]; then
+        find_package_rel_dir_for_path "${primary_source}"
+        return 0
+    fi
+    echo "."
+}
+
 package_rel_dir="$(resolve_package_rel_dir)"
 execution_rel_dir="$(resolve_execution_rel_dir "${package_rel_dir}")"
+install_root_rel_dir="$(resolve_install_root_rel_dir)"
+package_rel_dir_in_install_root="$(strip_rel_prefix "${package_rel_dir}" "${install_root_rel_dir}")"
 
 runtime_workspace="$(mktemp -d)"
 cleanup_runtime_workspace() {
@@ -494,9 +593,29 @@ runtime_package_dir="${runtime_workspace}"
 if [[ "${package_rel_dir}" != "." ]]; then
     runtime_package_dir="${runtime_workspace}/${package_rel_dir}"
 fi
+runtime_install_root="${runtime_workspace}"
+if [[ "${install_root_rel_dir}" != "." ]]; then
+    runtime_install_root="${runtime_workspace}/${install_root_rel_dir}"
+fi
 runtime_exec_dir="${runtime_workspace}"
 if [[ "${execution_rel_dir}" != "." ]]; then
     runtime_exec_dir="${runtime_workspace}/${execution_rel_dir}"
+fi
+
+if [[ -n "${primary_source}" ]]; then
+    materialize_tree_contents "${workspace_root}/${package_rel_dir}" "${runtime_package_dir}"
+fi
+
+if [[ -n "${package_json}" ]]; then
+    materialize_tree_contents "${workspace_root}/${install_root_rel_dir}" "${runtime_install_root}"
+fi
+
+if [[ -n "${primary_source}" && "${primary_source}" == "${workspace_root}"* ]]; then
+    primary_source="${runtime_workspace}/$(rel_dir_from_abs_path "${primary_source}")"
+fi
+
+if [[ -n "${package_json}" && "${package_json}" == "${workspace_root}"* ]]; then
+    package_json="${runtime_workspace}/$(rel_dir_from_abs_path "${package_json}")"
 fi
 
 workspace_package_map="${runtime_workspace}/.rules_bun_workspace_packages.tsv"
@@ -506,22 +625,23 @@ primary_node_modules="$(select_primary_node_modules)"
 install_repo_root=""
 if [[ -n "${primary_node_modules}" ]]; then
     install_repo_root="$(dirname "${primary_node_modules}")"
-    mirror_node_modules_dir "${primary_node_modules}" "${runtime_workspace}/node_modules"
+    mkdir -p "${runtime_install_root}"
+    mirror_node_modules_dir "${primary_node_modules}" "${runtime_install_root}/node_modules"
 fi
 
 if [[ -n "${install_repo_root}" ]]; then
-    resolved_install_node_modules="$(find_install_repo_node_modules "${install_repo_root}" "${package_rel_dir}" || true)"
+    resolved_install_node_modules="$(find_install_repo_node_modules "${install_repo_root}" "${package_rel_dir_in_install_root}" || true)"
     if [[ -n "${resolved_install_node_modules}" && "${resolved_install_node_modules}" != "${install_repo_root}/node_modules" ]]; then
         mirror_node_modules_dir "${resolved_install_node_modules}" "${runtime_package_dir}/node_modules"
     fi
-    mirror_install_repo_workspace_node_modules "${install_repo_root}" "${runtime_workspace}"
+    mirror_install_repo_workspace_node_modules "${install_repo_root}" "${runtime_install_root}"
 fi
 
-if [[ ! -e "${runtime_package_dir}/node_modules" && -e "${runtime_workspace}/node_modules" && "${runtime_package_dir}" != "${runtime_workspace}" ]]; then
-    ln -s "${runtime_workspace}/node_modules" "${runtime_package_dir}/node_modules"
+if [[ ! -e "${runtime_package_dir}/node_modules" && -e "${runtime_install_root}/node_modules" && "${runtime_package_dir}" != "${runtime_install_root}" ]]; then
+    ln -s "${runtime_install_root}/node_modules" "${runtime_package_dir}/node_modules"
 fi
 
-runtime_path="$(build_runtime_path "${runtime_workspace}" "${runtime_package_dir}")"
+runtime_path="$(build_runtime_path "${runtime_workspace}" "${runtime_package_dir}" "${runtime_install_root}")"
 if [[ -n "${runtime_path}" ]]; then
     export PATH="${runtime_path}"
 fi
@@ -632,7 +752,9 @@ def render_workspace_setup(
         working_dir_mode,
         primary_source_short_path = "",
         package_json_short_path = "",
-        package_dir_hint = "."):
+        package_dir_hint = ".",
+        install_root_rel_dir = ".",
+        install_metadata_short_path = ""):
     return _WORKSPACE_SETUP_TEMPLATE.replace("__BUN_SHORT_PATH__", bun_short_path).replace(
         "__PRIMARY_SOURCE_SHORT_PATH__",
         primary_source_short_path,
@@ -643,7 +765,12 @@ def render_workspace_setup(
         "__PACKAGE_DIR_HINT__",
         package_dir_hint or ".",
     ).replace(
+        "__INSTALL_ROOT_REL_DIR__",
+        install_root_rel_dir or ".",
+    ).replace(
+        "__INSTALL_METADATA_SHORT_PATH__",
+        install_metadata_short_path,
+    ).replace(
         "__WORKING_DIR_MODE__",
         working_dir_mode,
     )
-
