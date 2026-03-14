@@ -1,6 +1,7 @@
 """Rule for running test suites with Bun."""
 
-load("//internal:js_library.bzl", "BunSourcesInfo")
+load("//internal:js_library.bzl", "collect_js_runfiles")
+load("//internal:workspace.bzl", "create_bun_workspace_info", "render_workspace_setup", "workspace_runfiles")
 
 
 def _shell_quote(value):
@@ -10,53 +11,58 @@ def _shell_quote(value):
 def _bun_test_impl(ctx):
     toolchain = ctx.toolchains["//bun:toolchain_type"]
     bun_bin = toolchain.bun.bun_bin
+    primary_file = ctx.files.srcs[0]
+    dep_runfiles = [collect_js_runfiles(dep) for dep in ctx.attr.deps]
+    workspace_info = create_bun_workspace_info(
+        ctx,
+        extra_files = ctx.files.srcs + ctx.files.data + [bun_bin],
+        primary_file = primary_file,
+    )
 
     src_args = " ".join([_shell_quote(src.short_path) for src in ctx.files.srcs])
+    command = """
+trap cleanup_runtime_workspace EXIT
+cd "${runtime_workspace}"
+test_args=(__SRC_ARGS__)
+
+if [[ -n "${TESTBRIDGE_TEST_ONLY:-}" && -n "${COVERAGE_DIR:-}" ]]; then
+    exec "${bun_bin}" --bun test "${test_args[@]}" --test-name-pattern "${TESTBRIDGE_TEST_ONLY}" --coverage "$@"
+fi
+if [[ -n "${TESTBRIDGE_TEST_ONLY:-}" ]]; then
+    exec "${bun_bin}" --bun test "${test_args[@]}" --test-name-pattern "${TESTBRIDGE_TEST_ONLY}" "$@"
+fi
+if [[ -n "${COVERAGE_DIR:-}" ]]; then
+    exec "${bun_bin}" --bun test "${test_args[@]}" --coverage "$@"
+fi
+exec "${bun_bin}" --bun test "${test_args[@]}" "$@"
+""".replace("__SRC_ARGS__", src_args)
+    if ctx.attr.args:
+        default_args = "\n".join(['test_args+=({})'.format(_shell_quote(arg)) for arg in ctx.attr.args])
+        command = command.replace(
+            'test_args=(__SRC_ARGS__)',
+            'test_args=(__SRC_ARGS__)\n' + default_args,
+        )
+
     launcher = ctx.actions.declare_file(ctx.label.name)
     ctx.actions.write(
         output = launcher,
         is_executable = True,
-        content = """#!/usr/bin/env bash
-set -euo pipefail
-
-runfiles_dir="${{RUNFILES_DIR:-$0.runfiles}}"
-bun_bin="${{runfiles_dir}}/_main/{bun_short_path}"
-cd "${{runfiles_dir}}/_main"
-
-if [[ -n "${{TESTBRIDGE_TEST_ONLY:-}}" && -n "${{COVERAGE_DIR:-}}" ]]; then
-    exec "${{bun_bin}}" --bun test {src_args} --test-name-pattern "${{TESTBRIDGE_TEST_ONLY}}" --coverage "$@"
-fi
-if [[ -n "${{TESTBRIDGE_TEST_ONLY:-}}" ]]; then
-    exec "${{bun_bin}}" --bun test {src_args} --test-name-pattern "${{TESTBRIDGE_TEST_ONLY}}" "$@"
-fi
-if [[ -n "${{COVERAGE_DIR:-}}" ]]; then
-    exec "${{bun_bin}}" --bun test {src_args} --coverage "$@"
-fi
-exec "${{bun_bin}}" --bun test {src_args} "$@"
-""".format(
-                        bun_short_path = bun_bin.short_path,
-            src_args = src_args,
-        ),
+        content = render_workspace_setup(
+            bun_short_path = bun_bin.short_path,
+            primary_source_short_path = primary_file.short_path,
+            working_dir_mode = "workspace",
+        ) + command,
     )
-
-    transitive_files = []
-    if ctx.attr.node_modules:
-        transitive_files.append(ctx.attr.node_modules[DefaultInfo].files)
-    for dep in ctx.attr.deps:
-        if BunSourcesInfo in dep:
-            transitive_files.append(dep[BunSourcesInfo].transitive_sources)
-        else:
-            transitive_files.append(dep[DefaultInfo].files)
-
-    runfiles = ctx.runfiles(
-        files = [bun_bin] + ctx.files.srcs + ctx.files.data,
-        transitive_files = depset(transitive = transitive_files),
-    )
-
     return [
+        workspace_info,
         DefaultInfo(
             executable = launcher,
-            runfiles = runfiles,
+            runfiles = workspace_runfiles(
+                ctx,
+                workspace_info,
+                direct_files = [launcher],
+                transitive_files = dep_runfiles,
+            ),
         ),
     ]
 

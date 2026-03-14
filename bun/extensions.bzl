@@ -75,6 +75,7 @@ def _bun_install_impl(ctx):
                 bun_lockfile = install.bun_lockfile,
                 install_inputs = install.install_inputs,
                 isolated_home = install.isolated_home,
+                visible_repo_name = install.name,
             )
 
 

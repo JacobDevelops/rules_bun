@@ -33,6 +33,9 @@ The public entrypoint for rule authors and users is `@rules_bun//bun:defs.bzl`.
 - `bun_dev`
 - `bun_script`
 - `bun_test`
+- `js_binary`
+- `js_test`
+- `js_run_devserver`
 - `js_library`
 - `ts_library`
 
@@ -104,6 +107,36 @@ bun_install_ext.install(
 
 use_repo(bun_install_ext, "bun_deps")
 ```
+
+## `rules_js` compatibility layer
+
+`rules_bun` now exposes a Bun-backed compatibility layer for the most common
+`rules_js` entrypoints:
+
+- `@rules_bun//js:defs.bzl` exports `js_binary`, `js_test`, `js_run_devserver`,
+  `js_library`, `ts_library`, and `JsInfo`.
+- `@rules_bun//npm:extensions.bzl` exports `npm_translate_lock`, which creates a
+  Bun-installed external repo and generates `@<repo>//:defs.bzl` with
+  `npm_link_all_packages()`.
+
+Example:
+
+```starlark
+load("@rules_bun//js:defs.bzl", "js_binary")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+npm_link_all_packages()
+
+js_binary(
+    name = "app",
+    entry_point = "src/main.ts",
+    node_modules = ":node_modules",
+)
+```
+
+This is a compatibility subset, not a full reimplementation of `rules_js`.
+Package aliases created by `npm_link_all_packages()` use sanitized target names
+such as `npm__vite` or `npm__at_types_node`.
 
 ## Legacy WORKSPACE usage
 

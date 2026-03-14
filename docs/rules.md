@@ -2,6 +2,46 @@
 
 This file documents the public rules exported from `@rules_bun//bun:defs.bzl`.
 
+## js_binary
+
+Runs a JS/TS entry point with Bun behind a `rules_js`-style name.
+
+Attributes:
+
+- `entry_point` (label, required): path to the main JS/TS file to execute.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install` or `npm_translate_lock`, made available in runfiles.
+- `data` (label_list, optional): additional runtime files.
+- `deps` (label_list, optional): library dependencies required by the program.
+- `args` (string_list, optional): default arguments appended before command-line arguments passed to the binary.
+- `working_dir` (string, default: `"workspace"`, values: `"workspace" | "entry_point"`): runtime working directory.
+
+## js_test
+
+Runs Bun tests behind a `rules_js`-style name.
+
+Attributes:
+
+- `srcs` (label_list, required): test source files passed to `bun test`.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install` or `npm_translate_lock`, made available in runfiles.
+- `deps` (label_list, optional): library dependencies required by tests.
+- `data` (label_list, optional): additional runtime files needed by tests.
+- `args` (string_list, optional): default arguments appended after the test source list.
+
+## js_run_devserver
+
+Runs an executable target from a staged JS workspace.
+
+Attributes:
+
+- `tool` (label, required): executable target to launch as the dev server.
+- `args` (string_list, optional): default arguments appended before command-line arguments passed to the dev server.
+- `package_json` (label, optional): package manifest used to resolve the package working directory.
+- `package_dir_hint` (string, default: `"."`): package-relative directory hint when `package_json` is omitted.
+- `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install` or `npm_translate_lock`, made available in runfiles.
+- `deps` (label_list, optional): library dependencies required by the dev server.
+- `data` (label_list, optional): additional runtime files.
+- `working_dir` (string, default: `"workspace"`, values: `"workspace" | "package"`): runtime working directory.
+
 ## bun_binary
 
 Runs a JS/TS entry point with Bun as an executable target (`bazel run`).
@@ -11,6 +51,8 @@ Attributes:
 - `entry_point` (label, required): path to the main JS/TS file to execute.
 - `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, made available in runfiles.
 - `data` (label_list, optional): additional runtime files.
+- `deps` (label_list, optional): library dependencies required by the program.
+- `args` (string_list, optional): default arguments appended before command-line arguments passed to the binary.
 - `working_dir` (string, default: `"workspace"`, values: `"workspace" | "entry_point"`): runtime working directory.
 
 ## bun_dev
@@ -68,6 +110,7 @@ Attributes:
 - `node_modules` (label, optional): package files from a `node_modules` tree, typically produced by `bun_install`, made available in runfiles.
 - `deps` (label_list, optional): library dependencies required by tests.
 - `data` (label_list, optional): additional runtime files needed by tests.
+- `args` (string_list, optional): default arguments appended after the test source list.
 
 ## js_library
 
@@ -76,6 +119,8 @@ Aggregates JavaScript sources and transitive Bun source dependencies.
 Attributes:
 
 - `srcs` (label_list, optional): `.js`, `.jsx`, `.mjs`, `.cjs` files.
+- `types` (label_list, optional): `.d.ts` files propagated to dependents.
+- `data` (label_list, optional): runtime files propagated to dependents.
 - `deps` (label_list, optional): dependent source libraries.
 
 ## ts_library
@@ -85,4 +130,6 @@ Aggregates TypeScript sources and transitive Bun source dependencies.
 Attributes:
 
 - `srcs` (label_list, optional): `.ts`, `.tsx` files.
+- `types` (label_list, optional): `.d.ts` files propagated to dependents.
+- `data` (label_list, optional): runtime files propagated to dependents.
 - `deps` (label_list, optional): dependent source libraries.

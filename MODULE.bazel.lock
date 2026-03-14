@@ -192,7 +192,7 @@
   "moduleExtensions": {
     "//bun:extensions.bzl%bun": {
       "general": {
-        "bzlTransitiveDigest": "eSFVebwDN61an1dp3505njvMKN961HH+iY2tK6fEBQQ=",
+        "bzlTransitiveDigest": "mWoMIEcKvXURFuMv68yk2TPrpNykLSLygedENme3WrQ=",
         "usagesDigest": "/0BcCMA6AOzLhQaRK6DquxrCfpPHJUjSUaFz4zmQrsM=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"

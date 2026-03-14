@@ -40,6 +40,7 @@ bzl_library(
         "//internal:bun_dev_bzl",
         "//internal:bun_script_bzl",
         "//internal:bun_test_bzl",
+        "//internal:js_compat_bzl",
         "//internal:js_library_bzl",
     ],
 )

@@ -1,28 +1,5 @@
 {
   "nodes": {
-    "devshell-lib": {
-      "inputs": {
-        "git-hooks": "git-hooks",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "treefmt-nix": "treefmt-nix"
-      },
-      "locked": {
-        "lastModified": 1772815059,
-        "narHash": "sha256-9Mn8t/a7b43omtmKRsF0HmFpCkNpTsvYEq0y85KLL5s=",
-        "ref": "v2.0.1",
-        "rev": "80cc529de7060e079d89a69d8daaf0347b53d8f9",
-        "revCount": 43,
-        "type": "git",
-        "url": "https://git.dgren.dev/eric/nix-flake-lib"
-      },
-      "original": {
-        "ref": "v2.0.1",
-        "type": "git",
-        "url": "https://git.dgren.dev/eric/nix-flake-lib"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -43,7 +20,7 @@
       "inputs": {
         "flake-compat": "flake-compat",
         "gitignore": "gitignore",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1772024342,
@@ -62,7 +39,7 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
-          "devshell-lib",
+          "repo-lib",
           "git-hooks",
           "nixpkgs"
         ]
@@ -83,6 +60,22 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1772542754,
+        "narHash": "sha256-WGV2hy+VIeQsYXpsLjdr4GvHv5eECMISX1zKLTedhdg=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "8c809a146a140c5c8806f13399592dbcb1bb5dc4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
         "lastModified": 1770073757,
         "narHash": "sha256-Vy+G+F+3E/Tl+GMNgiHl9Pah2DgShmIUBJXmbiQPHbI=",
         "owner": "NixOS",
@@ -97,7 +90,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_2": {
+    "nixpkgs_3": {
       "locked": {
         "lastModified": 1770107345,
         "narHash": "sha256-tbS0Ebx2PiA1FRW8mt8oejR0qMXmziJmPaU1d4kYY9g=",
@@ -113,31 +106,38 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "repo-lib": {
+      "inputs": {
+        "git-hooks": "git-hooks",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix"
+      },
       "locked": {
-        "lastModified": 1772542754,
-        "narHash": "sha256-WGV2hy+VIeQsYXpsLjdr4GvHv5eECMISX1zKLTedhdg=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "8c809a146a140c5c8806f13399592dbcb1bb5dc4",
-        "type": "github"
+        "lastModified": 1772866275,
+        "narHash": "sha256-lsJrFIbq6OO5wUC648VnvOmJm3qgJrlEugbdjeZsP34=",
+        "ref": "refs/tags/v3.0.0",
+        "rev": "96d2d190466dddcb9e652c38b70152f09b9fcb05",
+        "revCount": 50,
+        "type": "git",
+        "url": "https://git.dgren.dev/eric/nix-flake-lib"
       },
       "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
+        "ref": "refs/tags/v3.0.0",
+        "type": "git",
+        "url": "https://git.dgren.dev/eric/nix-flake-lib"
       }
     },
     "root": {
       "inputs": {
-        "devshell-lib": "devshell-lib",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs",
+        "repo-lib": "repo-lib"
       }
     },
     "treefmt-nix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1770228511,

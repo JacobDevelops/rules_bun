@@ -1,6 +1,6 @@
 """Rule for bundling JS/TS sources with Bun."""
 
-load("//internal:js_library.bzl", "BunSourcesInfo")
+load("//internal:js_library.bzl", "collect_js_sources")
 
 
 def _output_name(target_name, entry):
@@ -16,10 +16,7 @@ def _bun_bundle_impl(ctx):
     if ctx.attr.node_modules:
         transitive_inputs.append(ctx.attr.node_modules[DefaultInfo].files)
     for dep in ctx.attr.deps:
-        if BunSourcesInfo in dep:
-            transitive_inputs.append(dep[BunSourcesInfo].transitive_sources)
-        else:
-            transitive_inputs.append(dep[DefaultInfo].files)
+        transitive_inputs.append(collect_js_sources(dep))
 
     outputs = []
     for entry in ctx.files.entry_points:

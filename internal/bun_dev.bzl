@@ -1,101 +1,76 @@
 """Rule for running JS/TS scripts with Bun in watch mode for development."""
 
+load("//internal:workspace.bzl", "create_bun_workspace_info", "render_workspace_setup", "workspace_runfiles")
+
 def _bun_dev_impl(ctx):
     toolchain = ctx.toolchains["//bun:toolchain_type"]
     bun_bin = toolchain.bun.bun_bin
     entry_point = ctx.file.entry_point
+    workspace_info = create_bun_workspace_info(
+        ctx,
+        extra_files = ctx.files.data + ctx.files.restart_on + [bun_bin],
+        primary_file = entry_point,
+    )
 
     restart_watch_paths = "\n".join([path.short_path for path in ctx.files.restart_on])
-
-    launcher = ctx.actions.declare_file(ctx.label.name)
-    ctx.actions.write(
-        output = launcher,
-        is_executable = True,
-        content = """#!/usr/bin/env bash
-set -euo pipefail
-
-runfiles_dir="${{RUNFILES_DIR:-$0.runfiles}}"
-workspace_root="${{runfiles_dir}}/_main"
-bun_bin="${{runfiles_dir}}/_main/{bun_short_path}"
-entry_point="${{runfiles_dir}}/_main/{entry_short_path}"
-
-resolve_entrypoint_workdir() {{
-    local dir
-    dir="$(dirname "${{entry_point}}")"
-    while [[ "${{dir}}" == "${{workspace_root}}"* ]]; do
-        if [[ -f "${{dir}}/.env" || -f "${{dir}}/package.json" ]]; then
-            echo "${{dir}}"
-            return 0
-        fi
-        if [[ "${{dir}}" == "${{workspace_root}}" ]]; then
-            break
-        fi
-        dir="$(dirname "${{dir}}")"
-    done
-    echo "$(dirname "${{entry_point}}")"
-}}
-
-working_dir="{working_dir}"
-if [[ "${{working_dir}}" == "entry_point" ]]; then
-    cd "$(resolve_entrypoint_workdir)"
-else
-    cd "${{workspace_root}}"
-fi
-
-watch_mode="{watch_mode}"
-if [[ "${{watch_mode}}" == "hot" ]]; then
+    command = """
+watch_mode="__WATCH_MODE__"
+if [[ "${watch_mode}" == "hot" ]]; then
     dev_flag="--hot"
 else
     dev_flag="--watch"
 fi
 
-run_dev() {{
-    exec "${{bun_bin}}" --bun "${{dev_flag}}" run "${{entry_point}}" "$@"
-}}
-
-if [[ {restart_count} -eq 0 ]]; then
-    run_dev "$@"
+if [[ __RESTART_COUNT__ -eq 0 ]]; then
+    trap cleanup_runtime_workspace EXIT
+    cd "${runtime_exec_dir}"
+    exec "${bun_bin}" --bun "${dev_flag}" run "${primary_source}" "$@"
 fi
 
 readarray -t restart_paths <<'EOF_RESTART_PATHS'
-{restart_watch_paths}
+__RESTART_PATHS__
 EOF_RESTART_PATHS
 
-file_mtime() {{
-    local p="$1"
-    if stat -f '%m' "${{p}}" >/dev/null 2>&1; then
-        stat -f '%m' "${{p}}"
+file_mtime() {
+    local path="$1"
+    if stat -f '%m' "${path}" >/dev/null 2>&1; then
+        stat -f '%m' "${path}"
         return 0
     fi
-    stat -c '%Y' "${{p}}"
-}}
+    stat -c '%Y' "${path}"
+}
 
 declare -A mtimes
-for rel in "${{restart_paths[@]}}"; do
-    path="${{runfiles_dir}}/_main/${{rel}}"
-    if [[ -e "${{path}}" ]]; then
-        mtimes["${{rel}}"]="$(file_mtime "${{path}}")"
+for rel in "${restart_paths[@]}"; do
+    path="${runfiles_dir}/_main/${rel}"
+    if [[ -e "${path}" ]]; then
+        mtimes["${rel}"]="$(file_mtime "${path}")"
     else
-        mtimes["${{rel}}"]="missing"
+        mtimes["${rel}"]="missing"
     fi
 done
 
 child_pid=""
-restart_child() {{
-    if [[ -n "${{child_pid}}" ]] && kill -0 "${{child_pid}}" 2>/dev/null; then
-        kill "${{child_pid}}"
-        wait "${{child_pid}}" || true
+restart_child() {
+    if [[ -n "${child_pid}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+        kill "${child_pid}"
+        wait "${child_pid}" || true
     fi
-    "${{bun_bin}}" --bun "${{dev_flag}}" run "${{entry_point}}" "$@" &
-    child_pid=$!
-}}
 
-cleanup() {{
-    if [[ -n "${{child_pid}}" ]] && kill -0 "${{child_pid}}" 2>/dev/null; then
-        kill "${{child_pid}}"
-        wait "${{child_pid}}" || true
+    (
+        cd "${runtime_exec_dir}"
+        exec "${bun_bin}" --bun "${dev_flag}" run "${primary_source}" "$@"
+    ) &
+    child_pid=$!
+}
+
+cleanup() {
+    if [[ -n "${child_pid}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+        kill "${child_pid}"
+        wait "${child_pid}" || true
     fi
-}}
+    cleanup_runtime_workspace
+}
 
 trap cleanup EXIT INT TERM
 
@@ -104,45 +79,46 @@ restart_child "$@"
 while true; do
     sleep 1
     changed=0
-    for rel in "${{restart_paths[@]}}"; do
-        path="${{runfiles_dir}}/_main/${{rel}}"
-        if [[ -e "${{path}}" ]]; then
-            current="$(file_mtime "${{path}}")"
+    for rel in "${restart_paths[@]}"; do
+        path="${runfiles_dir}/_main/${rel}"
+        if [[ -e "${path}" ]]; then
+            current="$(file_mtime "${path}")"
         else
             current="missing"
         fi
-        if [[ "${{current}}" != "${{mtimes[${{rel}}]}}" ]]; then
-            mtimes["${{rel}}"]="${{current}}"
+        if [[ "${current}" != "${mtimes[${rel}]}" ]]; then
+            mtimes["${rel}"]="${current}"
             changed=1
         fi
     done
-    if [[ "${{changed}}" -eq 1 ]]; then
+    if [[ "${changed}" -eq 1 ]]; then
         restart_child "$@"
     fi
 done
-""".format(
-            bun_short_path = bun_bin.short_path,
-            entry_short_path = entry_point.short_path,
-            watch_mode = ctx.attr.watch_mode,
-            working_dir = ctx.attr.working_dir,
-            restart_count = len(ctx.files.restart_on),
-            restart_watch_paths = restart_watch_paths,
-        ),
+""".replace("__WATCH_MODE__", ctx.attr.watch_mode).replace(
+        "__RESTART_COUNT__",
+        str(len(ctx.files.restart_on)),
+    ).replace(
+        "__RESTART_PATHS__",
+        restart_watch_paths,
     )
 
-    transitive_files = []
-    if ctx.attr.node_modules:
-        transitive_files.append(ctx.attr.node_modules[DefaultInfo].files)
-
-    runfiles = ctx.runfiles(
-        files = [bun_bin, entry_point] + ctx.files.data + ctx.files.restart_on,
-        transitive_files = depset(transitive = transitive_files),
+    launcher = ctx.actions.declare_file(ctx.label.name)
+    ctx.actions.write(
+        output = launcher,
+        is_executable = True,
+        content = render_workspace_setup(
+            bun_short_path = bun_bin.short_path,
+            primary_source_short_path = entry_point.short_path,
+            working_dir_mode = ctx.attr.working_dir,
+        ) + command,
     )
 
     return [
+        workspace_info,
         DefaultInfo(
             executable = launcher,
-            runfiles = runfiles,
+            runfiles = workspace_runfiles(ctx, workspace_info, direct_files = [launcher]),
         ),
     ]
 

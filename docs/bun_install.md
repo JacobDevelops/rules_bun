@@ -14,6 +14,7 @@ Unlike the build rules in [rules.md](rules.md), `bun_install` is not loaded from
 - runs `bun install --frozen-lockfile`
 - uses your checked-in `package.json` and `bun.lock` or `bun.lockb`
 - creates an external Bazel repository exposing `:node_modules`
+- generates `:defs.bzl` with `npm_link_all_packages()` and `package_target_name()`
 - keeps dependency installation under Bun rather than npm
 
 The generated repository can then be passed to rules such as `bun_script`,

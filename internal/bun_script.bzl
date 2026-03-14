@@ -1,5 +1,6 @@
 """Rule for running package.json scripts with Bun."""
 
+load("//internal:workspace.bzl", "create_bun_workspace_info", "render_workspace_setup", "workspace_runfiles")
 
 def _shell_quote(value):
     return "'" + value.replace("'", "'\"'\"'") + "'"
@@ -9,302 +10,37 @@ def _bun_script_impl(ctx):
     toolchain = ctx.toolchains["//bun:toolchain_type"]
     bun_bin = toolchain.bun.bun_bin
     package_json = ctx.file.package_json
+    workspace_info = create_bun_workspace_info(
+        ctx,
+        extra_files = ctx.files.data + [bun_bin],
+        package_dir_hint = package_json.dirname or ".",
+        package_json = package_json,
+        primary_file = package_json,
+    )
+    command = """
+trap cleanup_runtime_workspace EXIT
+cd "${runtime_exec_dir}"
+exec "${bun_bin}" --bun run __SCRIPT__ "$@"
+""".replace("__SCRIPT__", _shell_quote(ctx.attr.script))
 
     launcher = ctx.actions.declare_file(ctx.label.name)
     ctx.actions.write(
         output = launcher,
         is_executable = True,
-        content = """#!/usr/bin/env bash
-set -euo pipefail
-
-runfiles_dir="${{RUNFILES_DIR:-$0.runfiles}}"
-workspace_root="${{runfiles_dir}}/_main"
-workspace_root="$(cd "${{workspace_root}}" && pwd -P)"
-bun_bin="${{runfiles_dir}}/_main/{bun_short_path}"
-package_json="${{runfiles_dir}}/_main/{package_json_short_path}"
-package_dir="$(cd "$(dirname "${{package_json}}")" && pwd -P)"
-package_rel_dir="{package_rel_dir}"
-
-select_primary_node_modules() {{
-    local selected=""
-    local fallback=""
-    while IFS= read -r node_modules_dir; do
-        if [[ -z "${{fallback}}" ]]; then
-            fallback="${{node_modules_dir}}"
-        fi
-
-        if [[ ! -d "${{node_modules_dir}}/.bun" ]]; then
-            continue
-        fi
-
-        if [[ "${{node_modules_dir}}" != *"/runfiles/_main/"* ]]; then
-            selected="${{node_modules_dir}}"
-            break
-        fi
-
-        if [[ -z "${{selected}}" ]]; then
-            selected="${{node_modules_dir}}"
-        fi
-    done < <(find -L "${{runfiles_dir}}" -type d -name node_modules 2>/dev/null | sort)
-
-    if [[ -n "${{selected}}" ]]; then
-        echo "${{selected}}"
-    else
-        echo "${{fallback}}"
-    fi
-}}
-
-primary_node_modules="$(select_primary_node_modules)"
-
-runtime_workspace="$(mktemp -d)"
-cleanup_runtime_workspace() {{
-    rm -rf "${{runtime_workspace}}"
-}}
-trap cleanup_runtime_workspace EXIT
-
-runtime_package_dir="${{runtime_workspace}}/${{package_rel_dir}}"
-mkdir -p "${{runtime_package_dir}}"
-cp -RL "${{package_dir}}/." "${{runtime_package_dir}}/"
-
-workspace_package_map="${{runtime_workspace}}/workspace-packages.tsv"
-python3 - "${{runtime_package_dir}}" >"${{workspace_package_map}}" <<'PY'
-import json
-import os
-import sys
-
-root = sys.argv[1]
-
-for dirpath, dirnames, filenames in os.walk(root):
-    dirnames[:] = [name for name in dirnames if name != "node_modules"]
-    if "package.json" not in filenames:
-        continue
-
-    manifest_path = os.path.join(dirpath, "package.json")
-    try:
-        with open(manifest_path, "r", encoding="utf-8") as manifest_file:
-            package_name = json.load(manifest_file).get("name")
-    except Exception:
-        continue
-
-    if isinstance(package_name, str):
-        print(f"{{package_name}}\t{{dirpath}}")
-PY
-
-install_repo_root=""
-if [[ -n "${{primary_node_modules}}" ]]; then
-    install_repo_root="$(dirname "${{primary_node_modules}}")"
-    ln -s "${{primary_node_modules}}" "${{runtime_workspace}}/node_modules"
-fi
-
-workspace_package_dir_for_source() {{
-    local source="$1"
-    local manifest_path="${{source}}/package.json"
-    local package_name=""
-    local workspace_dir=""
-
-    if [[ ! -f "${{manifest_path}}" ]]; then
-        return 1
-    fi
-
-    package_name="$(python3 - "${{manifest_path}}" <<'PY'
-import json
-import sys
-
-try:
-    with open(sys.argv[1], "r", encoding="utf-8") as manifest_file:
-        package_name = json.load(manifest_file).get("name", "")
-except Exception:
-    package_name = ""
-
-if isinstance(package_name, str):
-    print(package_name)
-PY
-)"
-
-    workspace_dir="$(awk -F '\t' -v name="$package_name" '$1 == name {{ print $2; exit }}' "${{workspace_package_map}}")"
-    if [[ -n "${{package_name}}" && -n "${{workspace_dir}}" ]]; then
-        echo "${{workspace_dir}}"
-        return 0
-    fi
-
-    return 1
-}}
-
-link_node_modules_entry() {{
-    local source="$1"
-    local destination="$2"
-    local workspace_target=""
-
-    rm -rf "${{destination}}"
-    workspace_target="$(workspace_package_dir_for_source "${{source}}" || true)"
-    if [[ -n "${{workspace_target}}" ]]; then
-        ln -s "${{workspace_target}}" "${{destination}}"
-        return 0
-    fi
-
-    if [[ -L "${{source}}" ]]; then
-        ln -s "$(readlink "${{source}}")" "${{destination}}"
-    else
-        ln -s "${{source}}" "${{destination}}"
-    fi
-}}
-
-mirror_node_modules_dir() {{
-    local source_dir="$1"
-    local destination_dir="$2"
-    local entry=""
-    local scoped_entry=""
-
-    rm -rf "${{destination_dir}}"
-    mkdir -p "${{destination_dir}}"
-
-    shopt -s dotglob nullglob
-    for entry in "${{source_dir}}"/* "${{source_dir}}"/.[!.]* "${{source_dir}}"/..?*; do
-        local entry_name="$(basename "${{entry}}")"
-        if [[ "${{entry_name}}" == "." || "${{entry_name}}" == ".." ]]; then
-            continue
-        fi
-
-        if [[ -d "${{entry}}" && ! -L "${{entry}}" && "${{entry_name}}" == @* ]]; then
-            mkdir -p "${{destination_dir}}/${{entry_name}}"
-            for scoped_entry in "${{entry}}"/* "${{entry}}"/.[!.]* "${{entry}}"/..?*; do
-                local scoped_name="$(basename "${{scoped_entry}}")"
-                if [[ "${{scoped_name}}" == "." || "${{scoped_name}}" == ".." ]]; then
-                    continue
-                fi
-
-                link_node_modules_entry "${{scoped_entry}}" "${{destination_dir}}/${{entry_name}}/${{scoped_name}}"
-            done
-            continue
-        fi
-
-        link_node_modules_entry "${{entry}}" "${{destination_dir}}/${{entry_name}}"
-    done
-    shopt -u dotglob nullglob
-}}
-
-find_node_modules() {{
-    local dir="$1"
-    local root="$2"
-
-    while [[ "$dir" == "$root"* ]]; do
-        if [[ -d "$dir/node_modules" ]]; then
-            echo "$dir/node_modules"
-            return 0
-        fi
-
-        if [[ "$dir" == "$root" ]]; then
-            break
-        fi
-
-        dir="$(dirname "$dir")"
-    done
-
-    return 1
-}}
-
-find_install_repo_node_modules() {{
-    local repo_root="$1"
-    local rel_dir="$2"
-    local candidate="${{rel_dir}}"
-
-    while [[ -n "${{candidate}}" ]]; do
-        if [[ -d "${{repo_root}}/${{candidate}}/node_modules" ]]; then
-            echo "${{repo_root}}/${{candidate}}/node_modules"
-            return 0
-        fi
-
-        if [[ "${{candidate}}" != */* ]]; then
-            break
-        fi
-
-        candidate="${{candidate#*/}}"
-    done
-
-    if [[ -d "${{repo_root}}/node_modules" ]]; then
-        echo "${{repo_root}}/node_modules"
-        return 0
-    fi
-
-    return 1
-}}
-
-mirror_install_repo_workspace_node_modules() {{
-    local repo_root="$1"
-    local destination_root="$2"
-
-    while IFS= read -r install_node_modules; do
-        local rel_path="${{install_node_modules#${{repo_root}}/}}"
-        local destination="${{destination_root}}/${{rel_path}}"
-
-        mkdir -p "$(dirname "${{destination}}")"
-        mirror_node_modules_dir "${{install_node_modules}}" "${{destination}}"
-    done < <(find "${{repo_root}}" \
-        -path "${{repo_root}}/node_modules" -prune -o \
-        -type d -name node_modules -print 2>/dev/null | sort)
-}}
-
-resolved_install_node_modules=""
-if [[ -n "${{install_repo_root}}" ]]; then
-    resolved_install_node_modules="$(find_install_repo_node_modules "${{install_repo_root}}" "${{package_rel_dir}}" || true)"
-fi
-
-if [[ -n "${{resolved_install_node_modules}}" ]]; then
-    mirror_node_modules_dir "${{resolved_install_node_modules}}" "${{runtime_package_dir}}/node_modules"
-else
-    resolved_node_modules="$(find_node_modules "${{runtime_package_dir}}" "${{runtime_workspace}}" || true)"
-    if [[ -n "${{resolved_node_modules}}" && "${{resolved_node_modules}}" != "${{runtime_package_dir}}/node_modules" ]]; then
-        mirror_node_modules_dir "${{resolved_node_modules}}" "${{runtime_package_dir}}/node_modules"
-    fi
-fi
-
-if [[ -n "${{install_repo_root}}" ]]; then
-    mirror_install_repo_workspace_node_modules "${{install_repo_root}}" "${{runtime_package_dir}}"
-fi
-
-path_entries=()
-if [[ -d "${{runtime_package_dir}}/node_modules/.bin" ]]; then
-    path_entries+=("${{runtime_package_dir}}/node_modules/.bin")
-fi
-
-if [[ -d "${{runtime_workspace}}/node_modules/.bin" && "${{runtime_workspace}}/node_modules/.bin" != "${{runtime_package_dir}}/node_modules/.bin" ]]; then
-    path_entries+=("${{runtime_workspace}}/node_modules/.bin")
-fi
-
-if [[ ${{#path_entries[@]}} -gt 0 ]]; then
-    export PATH="$(IFS=:; echo "${{path_entries[*]}}"):${{PATH}}"
-fi
-
-working_dir="{working_dir}"
-if [[ "${{working_dir}}" == "package" ]]; then
-    cd "${{runtime_package_dir}}"
-else
-    cd "${{runtime_workspace}}"
-fi
-
-exec "${{bun_bin}}" --bun run {script} "$@"
-""".format(
+        content = render_workspace_setup(
             bun_short_path = bun_bin.short_path,
+            package_dir_hint = package_json.dirname or ".",
             package_json_short_path = package_json.short_path,
-            package_rel_dir = package_json.dirname,
-            working_dir = ctx.attr.working_dir,
-            script = _shell_quote(ctx.attr.script),
-        ),
-    )
-
-    transitive_files = []
-    if ctx.attr.node_modules:
-        transitive_files.append(ctx.attr.node_modules[DefaultInfo].files)
-
-    runfiles = ctx.runfiles(
-        files = [bun_bin, package_json] + ctx.files.data,
-        transitive_files = depset(transitive = transitive_files),
+            primary_source_short_path = package_json.short_path,
+            working_dir_mode = ctx.attr.working_dir,
+        ) + command,
     )
 
     return [
+        workspace_info,
         DefaultInfo(
             executable = launcher,
-            runfiles = runfiles,
+            runfiles = workspace_runfiles(ctx, workspace_info, direct_files = [launcher]),
         ),
     ]
 

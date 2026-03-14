@@ -1,67 +1,55 @@
 """Rule for running JS/TS scripts with Bun."""
 
+load("//internal:js_library.bzl", "collect_js_runfiles")
+load("//internal:workspace.bzl", "create_bun_workspace_info", "render_workspace_setup", "workspace_runfiles")
+
+def _shell_quote(value):
+    return "'" + value.replace("'", "'\"'\"'") + "'"
 
 def _bun_binary_impl(ctx):
     toolchain = ctx.toolchains["//bun:toolchain_type"]
     bun_bin = toolchain.bun.bun_bin
     entry_point = ctx.file.entry_point
+    dep_runfiles = [collect_js_runfiles(dep) for dep in ctx.attr.deps]
+    workspace_info = create_bun_workspace_info(
+        ctx,
+        extra_files = ctx.files.data + [bun_bin],
+        primary_file = entry_point,
+    )
+
+    command = """
+trap cleanup_runtime_workspace EXIT
+cd "${runtime_exec_dir}"
+exec "${bun_bin}" --bun run "${primary_source}" "$@"
+"""
+    if ctx.attr.args:
+        command = """
+trap cleanup_runtime_workspace EXIT
+cd "${runtime_exec_dir}"
+exec "${bun_bin}" --bun run "${primary_source}" __DEFAULT_ARGS__ "$@"
+""".replace("__DEFAULT_ARGS__", " ".join([_shell_quote(arg) for arg in ctx.attr.args]))
 
     launcher = ctx.actions.declare_file(ctx.label.name)
     ctx.actions.write(
         output = launcher,
         is_executable = True,
-        content = """#!/usr/bin/env bash
-set -euo pipefail
-
-runfiles_dir="${{RUNFILES_DIR:-$0.runfiles}}"
-workspace_root="${{runfiles_dir}}/_main"
-bun_bin="${{runfiles_dir}}/_main/{bun_short_path}"
-entry_point="${{runfiles_dir}}/_main/{entry_short_path}"
-
-resolve_entrypoint_workdir() {{
-    local dir
-    dir="$(dirname "${{entry_point}}")"
-    while [[ "${{dir}}" == "${{workspace_root}}"* ]]; do
-        if [[ -f "${{dir}}/.env" || -f "${{dir}}/package.json" ]]; then
-            echo "${{dir}}"
-            return 0
-        fi
-        if [[ "${{dir}}" == "${{workspace_root}}" ]]; then
-            break
-        fi
-        dir="$(dirname "${{dir}}")"
-    done
-    echo "$(dirname "${{entry_point}}")"
-}}
-
-working_dir="{working_dir}"
-if [[ "${{working_dir}}" == "entry_point" ]]; then
-    cd "$(resolve_entrypoint_workdir)"
-else
-    cd "${{workspace_root}}"
-fi
-
-exec "${{bun_bin}}" --bun run "${{entry_point}}" "$@"
-""".format(
+        content = render_workspace_setup(
             bun_short_path = bun_bin.short_path,
-            entry_short_path = entry_point.short_path,
-            working_dir = ctx.attr.working_dir,
-        ),
-    )
-
-    transitive_files = []
-    if ctx.attr.node_modules:
-        transitive_files.append(ctx.attr.node_modules[DefaultInfo].files)
-
-    runfiles = ctx.runfiles(
-        files = [bun_bin, entry_point] + ctx.files.data,
-        transitive_files = depset(transitive = transitive_files),
+            primary_source_short_path = entry_point.short_path,
+            working_dir_mode = ctx.attr.working_dir,
+        ) + command,
     )
 
     return [
+        workspace_info,
         DefaultInfo(
             executable = launcher,
-            runfiles = runfiles,
+            runfiles = workspace_runfiles(
+                ctx,
+                workspace_info,
+                direct_files = [launcher],
+                transitive_files = dep_runfiles,
+            ),
         ),
     ]
 
@@ -84,6 +72,9 @@ Use this rule for non-test scripts and CLIs that should run via `bazel run`.
         "data": attr.label_list(
             allow_files = True,
             doc = "Additional runtime files required by the program.",
+        ),
+        "deps": attr.label_list(
+            doc = "Library dependencies required by the program.",
         ),
         "working_dir": attr.string(
             default = "workspace",
