@@ -5,7 +5,7 @@ bun_path="$1"
 workdir="$(mktemp -d)"
 trap 'rm -rf "${workdir}"' EXIT
 
-cat > "${workdir}/package.json" <<'JSON'
+cat >"${workdir}/package.json" <<'JSON'
 {
   "name": "clean-install-test",
   "version": "1.0.0"

@@ -1,7 +1,7 @@
 # Bun rules for [Bazel](https://bazel.build)
 
-`rules_bun` provides Bazel rules for running, testing, bundling, and developing
-JavaScript and TypeScript code with Bun.
+`rules_bun` provides Bazel rules for running, testing, building, compiling,
+bundling, and developing JavaScript and TypeScript code with Bun.
 
 ## Repository layout
 
@@ -29,6 +29,8 @@ The public entrypoint for rule authors and users is `@rules_bun//bun:defs.bzl`.
 `rules_bun` exports these primary rules:
 
 - `bun_binary`
+- `bun_build`
+- `bun_compile`
 - `bun_bundle`
 - `bun_dev`
 - `bun_script`
@@ -70,9 +72,12 @@ use_repo(
     bun_ext,
     "bun_linux_x64",
     "bun_linux_aarch64",
+    "bun_linux_x64_musl",
+    "bun_linux_aarch64_musl",
     "bun_darwin_x64",
     "bun_darwin_aarch64",
     "bun_windows_x64",
+    "bun_windows_aarch64",
 )
 
 register_toolchains(
@@ -155,6 +160,8 @@ bun_register_toolchains()
 load(
     "@rules_bun//bun:defs.bzl",
     "bun_binary",
+    "bun_build",
+    "bun_compile",
     "bun_bundle",
     "bun_dev",
     "bun_script",
@@ -193,6 +200,32 @@ bun_script(
 When `node_modules` is provided, executables from `node_modules/.bin` are added
 to `PATH`. This label typically comes from `bun_install`, which still produces a
 standard `node_modules/` directory.
+
+### `bun_build` and `bun_compile`
+
+Use `bun_build` for general-purpose `bun build` output directories and
+`bun_compile` for standalone executables built with `bun build --compile`.
+
+```starlark
+load("@rules_bun//bun:defs.bzl", "bun_build", "bun_compile")
+
+bun_build(
+    name = "site",
+    entry_points = ["src/index.html"],
+    data = glob(["src/**"]),
+    splitting = True,
+    metafile = True,
+)
+
+bun_compile(
+    name = "cli",
+    entry_point = "src/cli.ts",
+)
+```
+
+`bun_build` exposes a directory output so Bun can emit HTML, CSS, assets, and
+split chunks. `bun_compile` produces a single executable artifact and supports
+explicit cross-compilation via `compile_executable`.
 
 ### `bun_dev` for local development
 

@@ -1,4 +1,5 @@
 """Public API surface for Bun Bazel rules."""
+load("//internal:bun_compile.bzl", _bun_build = "bun_build", _bun_compile = "bun_compile")
 load("//internal:bun_binary.bzl", _bun_binary = "bun_binary")
 load("//internal:bun_bundle.bzl", _bun_bundle = "bun_bundle")
 load("//internal:bun_dev.bzl", _bun_dev = "bun_dev")
@@ -11,6 +12,8 @@ load(":toolchain.bzl", _BunToolchainInfo = "BunToolchainInfo", _bun_toolchain = 
 visibility("public")
 
 bun_binary = _bun_binary
+bun_build = _bun_build
+bun_compile = _bun_compile
 bun_bundle = _bun_bundle
 bun_dev = _bun_dev
 bun_script = _bun_script

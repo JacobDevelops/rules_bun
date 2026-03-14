@@ -71,3 +71,25 @@ sh_test(
     args = ["$(location :env_parent_cwd_bin)"],
     data = [":env_parent_cwd_bin"],
 )
+
+bun_binary(
+    name = "runtime_flag_bin",
+    entry_point = "flag_probe.ts",
+    args = ["one", "two"],
+    preload = ["preload.ts"],
+    env_files = ["runtime.env"],
+)
+
+sh_test(
+    name = "bun_binary_runtime_flags_test",
+    srcs = ["run_flag_binary.sh"],
+    args = ["$(location :runtime_flag_bin)"],
+    data = [":runtime_flag_bin"],
+)
+
+sh_test(
+    name = "bun_binary_runtime_flags_shape_test",
+    srcs = ["verify_runtime_flags_shape.sh"],
+    args = ["$(location :runtime_flag_bin)"],
+    data = [":runtime_flag_bin"],
+)

@@ -35,7 +35,9 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         ":toolchain_bzl",
+        "//internal:bun_build_support_bzl",
         "//internal:bun_binary_bzl",
+        "//internal:bun_compile_bzl",
         "//internal:bun_bundle_bzl",
         "//internal:bun_dev_bzl",
         "//internal:bun_script_bzl",

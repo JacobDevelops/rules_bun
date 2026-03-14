@@ -1,6 +1,6 @@
 """Rule for bundling JS/TS sources with Bun."""
 
-load("//internal:js_library.bzl", "collect_js_sources")
+load("//internal:bun_build_support.bzl", "add_bun_build_common_flags", "bun_build_transitive_inputs")
 
 
 def _output_name(target_name, entry):
@@ -12,11 +12,7 @@ def _bun_bundle_impl(ctx):
     toolchain = ctx.toolchains["//bun:toolchain_type"]
     bun_bin = toolchain.bun.bun_bin
 
-    transitive_inputs = []
-    if ctx.attr.node_modules:
-        transitive_inputs.append(ctx.attr.node_modules[DefaultInfo].files)
-    for dep in ctx.attr.deps:
-        transitive_inputs.append(collect_js_sources(dep))
+    transitive_inputs = bun_build_transitive_inputs(ctx)
 
     outputs = []
     for entry in ctx.files.entry_points:
@@ -26,20 +22,12 @@ def _bun_bundle_impl(ctx):
         args = ctx.actions.args()
         args.add("--bun")
         args.add("build")
-        args.add(entry.path)
+        add_bun_build_common_flags(args, ctx.attr)
         args.add("--outfile")
         args.add(output.path)
-        args.add("--target")
-        args.add(ctx.attr.target)
-        args.add("--format")
-        args.add(ctx.attr.format)
-        if ctx.attr.minify:
-            args.add("--minify")
         if ctx.attr.sourcemap:
             args.add("--sourcemap")
-        for package in ctx.attr.external:
-            args.add("--external")
-            args.add(package)
+        args.add(entry.path)
 
         ctx.actions.run(
             executable = bun_bin,
@@ -78,6 +66,11 @@ Each entry point produces one output JavaScript artifact.
             allow_files = True,
             doc = "Additional non-source files needed during bundling.",
         ),
+        "install_mode": attr.string(
+            default = "disable",
+            values = ["disable", "auto", "fallback", "force"],
+            doc = "Whether Bun may auto-install missing packages during bundling.",
+        ),
         "target": attr.string(
             default = "browser",
             values = ["browser", "node", "bun"],
@@ -98,6 +91,9 @@ Each entry point produces one output JavaScript artifact.
         ),
         "external": attr.string_list(
             doc = "Package names to treat as externals (not bundled).",
+        ),
+        "build_flags": attr.string_list(
+            doc = "Additional raw flags forwarded to `bun build`.",
         ),
     },
     toolchains = ["//bun:toolchain_type"],

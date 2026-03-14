@@ -121,3 +121,10 @@ sh_test(
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }),
 )
+
+sh_test(
+    name = "bun_install_install_flags_shape_test",
+    srcs = ["install_flags_shape.sh"],
+    args = ["$(location //internal:bun_install.bzl)"],
+    data = ["//internal:bun_install.bzl"],
+)

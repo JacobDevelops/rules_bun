@@ -29,6 +29,8 @@ bun_install_ext.install(
     name = "bun_deps",
     package_json = "//:package.json",
     bun_lockfile = "//:bun.lock",
+    production = True,
+    omit = ["peer"],
 )
 
 use_repo(bun_install_ext, "bun_deps")
@@ -112,6 +114,45 @@ repository root.
 - `True` (default): more isolated install environment
 - `False`: lets Bun use the host `HOME`, which can improve repeated-install
   performance when Bun's cache is home-scoped
+
+### `production`
+
+Optional boolean controlling whether Bun installs only production dependencies.
+
+Example:
+
+```starlark
+production = True
+```
+
+### `omit`
+
+Optional list of dependency groups to omit, forwarded as repeated
+`--omit` flags. Common values are `dev`, `optional`, and `peer`.
+
+### `linker`
+
+Optional Bun linker strategy, forwarded as `--linker`.
+
+Common values:
+
+- `isolated`
+- `hoisted`
+
+### `backend`
+
+Optional Bun install backend, forwarded as `--backend`.
+
+Examples include `hardlink`, `symlink`, and `copyfile`.
+
+### `ignore_scripts`
+
+Optional boolean controlling whether Bun skips lifecycle scripts in the project
+manifest.
+
+### `install_flags`
+
+Optional list of additional raw flags forwarded to `bun install`.
 
 ## Notes
 

@@ -143,3 +143,25 @@ sh_test(
         ":paraglide_monorepo_app_b_build",
     ],
 )
+
+bun_script(
+    name = "workspace_filtered_script",
+    script = "say",
+    package_json = "workspace_run/package.json",
+    data = [
+        "workspace_run/packages/pkg-a/package.json",
+        "workspace_run/packages/pkg-a/say.ts",
+        "workspace_run/packages/pkg-b/package.json",
+        "workspace_run/packages/pkg-b/say.ts",
+    ],
+    filters = ["./packages/pkg-a"],
+    execution_mode = "sequential",
+    silent = True,
+)
+
+sh_test(
+    name = "bun_script_workspace_filter_test",
+    srcs = ["run_workspace_script.sh"],
+    args = ["$(location :workspace_filtered_script)"],
+    data = [":workspace_filtered_script"],
+)

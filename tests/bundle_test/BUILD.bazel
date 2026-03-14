@@ -1,4 +1,4 @@
-load("//bun:defs.bzl", "bun_bundle")
+load("//bun:defs.bzl", "bun_build", "bun_bundle", "bun_compile")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
 bun_bundle(
@@ -16,6 +16,32 @@ bun_bundle(
     name = "external_bundle",
     entry_points = ["main.ts"],
     external = ["left-pad"],
+)
+
+bun_build(
+    name = "site_build",
+    entry_points = ["site/index.html"],
+    data = [
+        "site/main.ts",
+        "site/styles.css",
+    ],
+    splitting = True,
+)
+
+bun_build(
+    name = "site_build_with_meta",
+    entry_points = ["site/index.html"],
+    data = [
+        "site/main.ts",
+        "site/styles.css",
+    ],
+    metafile = True,
+    metafile_md = True,
+)
+
+bun_compile(
+    name = "compiled_cli",
+    entry_point = "cli.ts",
 )
 
 sh_test(
@@ -56,4 +82,25 @@ sh_test(
         "//internal:bun_bundle.bzl",
         "//tests/bundle_test:BUILD.bazel",
     ],
+)
+
+sh_test(
+    name = "bun_build_site_output_test",
+    srcs = ["verify_site_build.sh"],
+    args = ["$(location :site_build)"],
+    data = [":site_build"],
+)
+
+sh_test(
+    name = "bun_build_site_meta_test",
+    srcs = ["verify_site_build_meta.sh"],
+    args = ["$(locations :site_build_with_meta)"],
+    data = [":site_build_with_meta"],
+)
+
+sh_test(
+    name = "bun_compile_output_test",
+    srcs = ["run_compiled_binary.sh"],
+    args = ["$(location :compiled_cli)"],
+    data = [":compiled_cli"],
 )

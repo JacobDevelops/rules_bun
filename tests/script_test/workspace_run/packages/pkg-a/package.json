@@ -1,0 +1,6 @@
+{
+  "name": "pkg-a",
+  "scripts": {
+    "say": "bun ./say.ts"
+  }
+}
