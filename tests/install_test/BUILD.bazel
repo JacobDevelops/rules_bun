@@ -166,6 +166,7 @@ sh_test(
         "//:repo_runtime_files",
         "//bun:repo_runtime_files",
         "//internal:repo_runtime_files",
+        "//tests:nested_bazel_test.sh",
     ],
     env_inherit = ["PATH"],
 )
@@ -201,6 +202,7 @@ sh_test(
         "//:repo_runtime_files",
         "//bun:repo_runtime_files",
         "//internal:repo_runtime_files",
+        "//tests:nested_bazel_test.sh",
     ],
     env_inherit = ["PATH"],
 )
@@ -228,6 +230,7 @@ sh_test(
         "//:repo_runtime_files",
         "//bun:repo_runtime_files",
         "//internal:repo_runtime_files",
+        "//tests:nested_bazel_test.sh",
     ],
     env_inherit = ["PATH"],
 )

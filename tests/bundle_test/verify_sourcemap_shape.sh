@@ -1,19 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if command -v bazel >/dev/null 2>&1; then
-  bazel_cmd=(bazel)
-elif command -v bazelisk >/dev/null 2>&1; then
-  bazel_cmd=(bazelisk)
-else
-  echo "bazel or bazelisk is required on PATH" >&2
-  exit 1
-fi
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck source=../nested_bazel_test.sh
+source "${script_dir}/../nested_bazel_test.sh"
+setup_nested_bazel_cmd
 
 find_workspace_root() {
   local candidate
   local module_path
-  local script_dir
+  local search_dir
 
   for candidate in \
     "${TEST_SRCDIR:-}/${TEST_WORKSPACE:-}" \
@@ -32,8 +28,8 @@ find_workspace_root() {
     fi
   fi
 
-  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-  candidate="$(cd "${script_dir}/../.." && pwd -P)"
+  search_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  candidate="$(cd "${search_dir}/../.." && pwd -P)"
   if [[ -f "${candidate}/MODULE.bazel" ]]; then
     printf '%s\n' "${candidate}"
     return 0
@@ -44,6 +40,14 @@ find_workspace_root() {
 }
 
 rules_bun_root="$(find_workspace_root)"
+
+cleanup() {
+  local status="$1"
+  trap - EXIT
+  shutdown_nested_bazel_workspace "${rules_bun_root}"
+  exit "${status}"
+}
+trap 'cleanup $?' EXIT
 
 bundle_output="$(
   cd "${rules_bun_root}" &&

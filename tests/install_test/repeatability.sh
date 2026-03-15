@@ -1,22 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck source=../nested_bazel_test.sh
+source "${script_dir}/../nested_bazel_test.sh"
+setup_nested_bazel_cmd
+
 bun_path="$1"
 
-if command -v bazel >/dev/null 2>&1; then
-  bazel_cmd=(bazel)
-elif command -v bazelisk >/dev/null 2>&1; then
-  bazel_cmd=(bazelisk)
-else
-  echo "bazel or bazelisk is required on PATH" >&2
-  exit 1
-fi
-
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 rules_bun_root="$(cd "${script_dir}/../.." && pwd -P)"
 
 workdir="$(mktemp -d)"
-trap 'rm -rf "${workdir}"' EXIT
+cleanup() {
+  local status="$1"
+  trap - EXIT
+  shutdown_nested_bazel_workspace "${fixture_dir:-}"
+  rm -rf "${workdir}"
+  exit "${status}"
+}
+trap 'cleanup $?' EXIT
 
 fixture_dir="${workdir}/fixture"
 mkdir -p "${fixture_dir}"

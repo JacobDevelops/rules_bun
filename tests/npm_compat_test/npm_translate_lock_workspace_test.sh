@@ -1,22 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if command -v bazel >/dev/null 2>&1; then
-  bazel_bin="$(command -v bazel)"
-elif command -v bazelisk >/dev/null 2>&1; then
-  bazel_bin="$(command -v bazelisk)"
-else
-  echo "bazel or bazelisk is required on PATH" >&2
-  exit 1
-fi
-
 bun_path="${1:-bun}"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck source=../nested_bazel_test.sh
+source "${script_dir}/../nested_bazel_test.sh"
+setup_nested_bazel_cmd
+
 rules_bun_root="$(cd "${script_dir}/../.." && pwd -P)"
 
 workdir="$(mktemp -d)"
-trap 'rm -rf "${workdir}"' EXIT
+cleanup() {
+  local status="$1"
+  trap - EXIT
+  shutdown_nested_bazel_workspace "${fixture_dir:-}"
+  rm -rf "${workdir}"
+  exit "${status}"
+}
+trap 'cleanup $?' EXIT
 
 fixture_dir="${workdir}/fixture"
 mkdir -p "${fixture_dir}"
@@ -100,7 +102,7 @@ EOF
 
 output="$(
   cd "${fixture_dir}" &&
-    "${bazel_bin}" run //:app
+    "${bazel_cmd[@]}" run //:app
 )"
 
 if [[ ${output} != *"compat:true"* ]]; then
@@ -110,7 +112,7 @@ fi
 
 query_output="$(
   cd "${fixture_dir}" &&
-    "${bazel_bin}" query //:npm__is_number
+    "${bazel_cmd[@]}" query //:npm__is_number
 )"
 if ! grep -Fxq "//:npm__is_number" <<<"${query_output}"; then
   echo "expected npm_link_all_packages to create //:npm__is_number" >&2
