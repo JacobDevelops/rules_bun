@@ -22,4 +22,6 @@ node_modules/
 
 .env
 !tests/.env
+!tests/**/.env
 !examples/.env
+!examples/**/.env

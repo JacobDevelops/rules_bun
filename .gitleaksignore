@@ -1,0 +1,3 @@
+tests/binary_test/.env:environment-file:1
+tests/script_test/.env:environment-file:1
+tests/binary_test/env_parent/.env:environment-file:1
