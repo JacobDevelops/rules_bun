@@ -197,6 +197,7 @@ sh_test(
     name = "bundle_sourcemap_shape_test",
     size = "small",
     srcs = ["verify_sourcemap_shape.sh"],
+    tags = ["exclusive"],
     data = [
         "BUILD.bazel",
         "//:repo_runtime_files",
@@ -237,6 +238,7 @@ sh_test(
     name = "bun_build_compile_flag_shape_test",
     size = "small",
     srcs = ["verify_flag_aquery.sh"],
+    tags = ["exclusive"],
     data = [
         "BUILD.bazel",
         "cli.ts",
