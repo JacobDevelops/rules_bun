@@ -22,6 +22,17 @@ check_pattern 'os:[[:space:]]+ubuntu-latest' "missing ubuntu matrix entry"
 check_pattern 'phase8_target:[[:space:]]+linux-x64' "missing linux-x64 matrix target"
 check_pattern 'os:[[:space:]]+macos-14' "missing macos matrix entry"
 check_pattern 'phase8_target:[[:space:]]+darwin-arm64' "missing darwin-arm64 matrix target"
-check_pattern 'os:[[:space:]]+windows-latest' "missing windows matrix entry"
-check_pattern 'phase8_target:[[:space:]]+windows' "missing windows matrix target"
+
+has_windows_os=0
+has_windows_target=0
+if grep -Eq 'os:[[:space:]]+windows-latest' "${workflow_file}"; then
+  has_windows_os=1
+fi
+if grep -Eq 'phase8_target:[[:space:]]+windows' "${workflow_file}"; then
+  has_windows_target=1
+fi
+if [[ ${has_windows_os} -ne ${has_windows_target} ]]; then
+  echo "Error: windows matrix entry and windows phase8 target must be added or removed together" >&2
+  exit 1
+fi
 echo "CI matrix shape checks passed"

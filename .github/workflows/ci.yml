@@ -28,7 +28,7 @@ jobs:
       USE_BAZEL_VERSION: 9.0.0
     steps:
       - uses: actions/checkout@v4
-      - uses: bazel-contrib/setup-bazel@0.15.0
+      - uses: bazel-contrib/setup-bazel@0.18.0
         with:
           bazelisk-cache: true
           repository-cache: true
@@ -36,6 +36,8 @@ jobs:
           disk-cache: ci-${{ matrix.phase8_target }}
           cache-save: ${{ github.event_name != 'pull_request' }}
       - name: Run tests (${{ matrix.phase8_target }})
+        shell: bash
         run: |
           echo "Phase 8 target: ${{ matrix.phase8_target }}"
-          bazel test //tests/...
+          targets="$(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")"
+          bazel test ${targets}

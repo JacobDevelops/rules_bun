@@ -32,6 +32,14 @@ config_setting(
     ],
 )
 
+config_setting(
+    name = "windows_x86_64",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 sh_test(
     name = "bun_install_clean_install_test",
     size = "small",
@@ -41,6 +49,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -48,6 +57,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }),
 )
@@ -61,6 +71,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -68,6 +79,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }),
 )
@@ -97,6 +109,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -104,6 +117,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }),
 )
@@ -117,6 +131,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -124,6 +139,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }),
 )
@@ -136,6 +152,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -143,6 +160,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }) + [
         "//:repo_runtime_files",
@@ -169,6 +187,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -176,6 +195,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }) + [
         "//:repo_runtime_files",
@@ -194,6 +214,7 @@ sh_test(
         ":linux_aarch64": ["$(location @bun_linux_aarch64//:bun)"],
         ":darwin_x86_64": ["$(location @bun_darwin_x64//:bun)"],
         ":darwin_aarch64": ["$(location @bun_darwin_aarch64//:bun)"],
+        ":windows_x86_64": ["$(location @bun_windows_x64//:bun)"],
         "//conditions:default": ["$(location @bun_linux_x64//:bun)"],
     }),
     data = select({
@@ -201,6 +222,7 @@ sh_test(
         ":linux_aarch64": ["@bun_linux_aarch64//:bun"],
         ":darwin_x86_64": ["@bun_darwin_x64//:bun"],
         ":darwin_aarch64": ["@bun_darwin_aarch64//:bun"],
+        ":windows_x86_64": ["@bun_windows_x64//:bun"],
         "//conditions:default": ["@bun_linux_x64//:bun"],
     }) + [
         "//:repo_runtime_files",
