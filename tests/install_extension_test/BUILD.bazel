@@ -6,3 +6,10 @@ sh_test(
     args = ["$(location //bun:extensions.bzl)"],
     data = ["//bun:extensions.bzl"],
 )
+
+sh_test(
+    name = "npm_translate_lock_extension_shape_test",
+    srcs = ["npm_extension_shape_test.sh"],
+    args = ["$(location //npm:extensions.bzl)"],
+    data = ["//npm:extensions.bzl"],
+)

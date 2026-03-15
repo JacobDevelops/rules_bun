@@ -36,9 +36,12 @@ use_repo(
 	bun_ext,
 	"bun_linux_x64",
 	"bun_linux_aarch64",
+	"bun_linux_x64_musl",
+	"bun_linux_aarch64_musl",
 	"bun_darwin_x64",
 	"bun_darwin_aarch64",
 	"bun_windows_x64",
+	"bun_windows_aarch64",
 )
 
 register_toolchains(
@@ -78,6 +81,12 @@ bun_script(
 
 `bun_script` runs from the package directory by default and adds
 `node_modules/.bin` to `PATH`.
+
+## Build and compile
+
+Use `bun_build` when Bun may emit a directory of outputs such as HTML, CSS,
+chunks, and static assets. Use `bun_compile` for standalone executables created
+with `bun build --compile`.
 
 ## Regeneration
 

@@ -10,6 +10,19 @@ exports_files([
     "version.bzl",
 ])
 
+filegroup(
+    name = "repo_runtime_files",
+    srcs = [
+        "BUILD.bazel",
+        "defs.bzl",
+        "extensions.bzl",
+        "repositories.bzl",
+        "toolchain.bzl",
+        "version.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "toolchain_bzl",
     srcs = ["toolchain.bzl"],
@@ -35,11 +48,14 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         ":toolchain_bzl",
+        "//internal:bun_build_support_bzl",
         "//internal:bun_binary_bzl",
+        "//internal:bun_compile_bzl",
         "//internal:bun_bundle_bzl",
         "//internal:bun_dev_bzl",
         "//internal:bun_script_bzl",
         "//internal:bun_test_bzl",
+        "//internal:js_compat_bzl",
         "//internal:js_library_bzl",
     ],
 )

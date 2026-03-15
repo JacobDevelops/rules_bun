@@ -3,29 +3,89 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
+    "bun_build_support.bzl",
     "bun_binary.bzl",
+    "bun_command.bzl",
+    "bun_compile.bzl",
     "bun_bundle.bzl",
     "bun_dev.bzl",
     "bun_install.bzl",
     "bun_script.bzl",
     "bun_test.bzl",
+    "js_compat.bzl",
     "js_library.bzl",
+    "js_run_devserver.bzl",
+    "workspace.bzl",
 ])
+
+filegroup(
+    name = "repo_runtime_files",
+    srcs = [
+        "BUILD.bazel",
+        "bun_binary.bzl",
+        "bun_build_support.bzl",
+        "bun_bundle.bzl",
+        "bun_command.bzl",
+        "bun_compile.bzl",
+        "bun_dev.bzl",
+        "bun_install.bzl",
+        "bun_script.bzl",
+        "bun_test.bzl",
+        "js_compat.bzl",
+        "js_library.bzl",
+        "js_run_devserver.bzl",
+        "workspace.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "bun_command_bzl",
+    srcs = ["bun_command.bzl"],
+)
+
+bzl_library(
+    name = "bun_build_support_bzl",
+    srcs = ["bun_build_support.bzl"],
+    deps = [
+        ":bun_command_bzl",
+        ":js_library_bzl",
+    ],
+)
 
 bzl_library(
     name = "bun_binary_bzl",
     srcs = ["bun_binary.bzl"],
+    deps = [
+        ":bun_command_bzl",
+        ":js_library_bzl",
+        ":workspace_bzl",
+    ],
+)
+
+bzl_library(
+    name = "bun_compile_bzl",
+    srcs = ["bun_compile.bzl"],
+    deps = [
+        ":bun_build_support_bzl",
+    ],
 )
 
 bzl_library(
     name = "bun_bundle_bzl",
     srcs = ["bun_bundle.bzl"],
-    deps = [":js_library_bzl"],
+    deps = [
+        ":bun_build_support_bzl",
+    ],
 )
 
 bzl_library(
     name = "bun_dev_bzl",
     srcs = ["bun_dev.bzl"],
+    deps = [
+        ":bun_command_bzl",
+        ":workspace_bzl",
+    ],
 )
 
 bzl_library(
@@ -36,15 +96,48 @@ bzl_library(
 bzl_library(
     name = "bun_script_bzl",
     srcs = ["bun_script.bzl"],
+    deps = [
+        ":bun_command_bzl",
+        ":workspace_bzl",
+    ],
 )
 
 bzl_library(
     name = "bun_test_bzl",
     srcs = ["bun_test.bzl"],
-    deps = [":js_library_bzl"],
+    deps = [
+        ":bun_command_bzl",
+        ":js_library_bzl",
+        ":workspace_bzl",
+    ],
+)
+
+bzl_library(
+    name = "js_compat_bzl",
+    srcs = ["js_compat.bzl"],
+    deps = [
+        ":bun_binary_bzl",
+        ":bun_test_bzl",
+        ":js_library_bzl",
+        ":js_run_devserver_bzl",
+    ],
 )
 
 bzl_library(
     name = "js_library_bzl",
     srcs = ["js_library.bzl"],
+)
+
+bzl_library(
+    name = "js_run_devserver_bzl",
+    srcs = ["js_run_devserver.bzl"],
+    deps = [
+        ":js_library_bzl",
+        ":workspace_bzl",
+    ],
+)
+
+bzl_library(
+    name = "workspace_bzl",
+    srcs = ["workspace.bzl"],
 )

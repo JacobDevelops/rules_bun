@@ -1,0 +1,5 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hello": "Hello from the shared translations",
+  "hero": "One shared translation source"
+}

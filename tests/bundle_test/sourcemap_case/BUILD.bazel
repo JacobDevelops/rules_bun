@@ -1,0 +1,13 @@
+load("//bun:defs.bzl", "bun_bundle")
+
+exports_files([
+    "BUILD.bazel",
+    "entry.ts",
+])
+
+bun_bundle(
+    name = "sourcemap_bundle",
+    tags = ["manual"],
+    entry_points = ["entry.ts"],
+    sourcemap = True,
+)

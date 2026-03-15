@@ -7,3 +7,4 @@ grep -Eq 'install_args = \[str\(bun_bin\), "--bun", "install", "--frozen-lockfil
 grep -Eq 'if repository_ctx\.attr\.isolated_home:' "${rule_file}"
 grep -Eq 'environment[[:space:]]*=[[:space:]]*\{"HOME":[[:space:]]*str\(repository_ctx\.path\("\."\)\)\}' "${rule_file}"
 grep -Eq '"isolated_home": attr\.bool\(default = True\)' "${rule_file}"
+grep -Eq '"install_flags": attr\.string_list\(\)' "${rule_file}"

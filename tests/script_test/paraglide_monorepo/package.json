@@ -1,0 +1,17 @@
+{
+  "name": "paraglide-monorepo-test",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "catalog": {
+      "@inlang/paraglide-js": "2.13.2",
+      "vite": "5.4.14"
+    }
+  },
+  "scripts": {
+    "build:app-a": "bun ./scripts/build-app-a.mjs",
+    "build:app-b": "bun ./scripts/build-app-b.mjs"
+  }
+}

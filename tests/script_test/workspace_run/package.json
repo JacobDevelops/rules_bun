@@ -1,0 +1,7 @@
+{
+  "name": "workspace-run-root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

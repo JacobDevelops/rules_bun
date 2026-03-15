@@ -38,6 +38,13 @@ bun_install_ext.install(
 use_repo(bun_install_ext, "script_test_vite_monorepo_node_modules")
 
 bun_install_ext.install(
+    name = "script_test_paraglide_monorepo_node_modules",
+    bun_lockfile = "//tests/script_test:paraglide_monorepo/bun.lock",
+    package_json = "//tests/script_test:paraglide_monorepo/package.json",
+)
+use_repo(bun_install_ext, "script_test_paraglide_monorepo_node_modules")
+
+bun_install_ext.install(
     name = "examples_vite_monorepo_node_modules",
     bun_lockfile = "//examples/vite_monorepo:bun.lock",
     package_json = "//examples/vite_monorepo:package.json",
