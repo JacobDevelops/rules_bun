@@ -75,6 +75,11 @@
                 ' "$README" > "$TMP" && mv "$TMP" "$README"
               '';
             }
+            {
+              run.script = ''
+                bazel test //tests/... >/dev/null
+              '';
+            }
           ];
 
           postVersion = ''
