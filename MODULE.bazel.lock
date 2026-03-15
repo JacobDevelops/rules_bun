@@ -194,7 +194,7 @@
     "//bun:extensions.bzl%bun": {
       "general": {
         "bzlTransitiveDigest": "314UOH4dQIGBHGpxCwA7yzI++E2J3bjIc20m5MZhM7U=",
-        "usagesDigest": "Pk8TCTd2EBKQ8R+VSF0M7sU9apLb/5tBy/dP2pjs3AU=",
+        "usagesDigest": "8lJhlTN0tALSLMIVpAoPHAUJ7DsvdI3M6FYRhgsDFtU=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
@@ -285,7 +285,7 @@
     "//bun:extensions.bzl%bun_install": {
       "general": {
         "bzlTransitiveDigest": "314UOH4dQIGBHGpxCwA7yzI++E2J3bjIc20m5MZhM7U=",
-        "usagesDigest": "2qW6PUxkK7CgK8mcsgVvlIbuJS/cBBkw5mylpKlqftE=",
+        "usagesDigest": "x+qjsT8RcvKKj6+UXY1J8kq8wHRbimCNctw3IUTdYzY=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
