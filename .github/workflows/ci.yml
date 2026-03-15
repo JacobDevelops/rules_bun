@@ -40,4 +40,4 @@ jobs:
         run: |
           echo "Phase 8 target: ${{ matrix.phase8_target }}"
           targets="$(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")"
-          bazel test ${targets}
+          bazel test --test_output=errors ${targets}
