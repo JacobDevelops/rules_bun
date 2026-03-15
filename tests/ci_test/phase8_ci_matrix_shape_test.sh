@@ -17,7 +17,7 @@ check_pattern() {
 }
 
 check_pattern '^name:[[:space:]]+CI$' "missing workflow name CI"
-check_pattern 'USE_BAZEL_VERSION:[[:space:]]+9\.0\.0' "missing Bazel 9.0.0 pin"
+check_pattern 'USE_BAZEL_VERSION:[[:space:]]+9\.0\.1' "missing Bazel 9.0.1 pin"
 check_pattern 'os:[[:space:]]+ubuntu-latest' "missing ubuntu matrix entry"
 check_pattern 'phase8_target:[[:space:]]+linux-x64' "missing linux-x64 matrix target"
 check_pattern 'os:[[:space:]]+macos-14' "missing macos matrix entry"

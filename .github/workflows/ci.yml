@@ -25,7 +25,7 @@ jobs:
             phase8_target: windows
     runs-on: ${{ matrix.os }}
     env:
-      USE_BAZEL_VERSION: 9.0.0
+      USE_BAZEL_VERSION: 9.0.1
     steps:
       - uses: actions/checkout@v4
       - uses: bazel-contrib/setup-bazel@0.18.0

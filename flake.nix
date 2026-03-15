@@ -15,7 +15,7 @@
       ...
     }:
     let
-      bazelVersion = "9.0.0";
+      bazelVersion = "9.0.1";
     in
     repo-lib.lib.mkRepo {
       inherit self nixpkgs;
