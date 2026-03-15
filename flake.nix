@@ -77,7 +77,7 @@
             }
             {
               run.script = ''
-                bazel test //tests/... >/dev/null
+                bazel cquery //tests/... >/dev/null
               '';
             }
           ];
