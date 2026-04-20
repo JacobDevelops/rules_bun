@@ -60,7 +60,10 @@ bzl_library(
     ],
 )
 
-toolchain_type(name = "toolchain_type")
+toolchain_type(
+    name = "toolchain_type",
+    visibility = ["//visibility:public"],
+)
 
 bun_toolchain(
     name = "linux_x64_toolchain_impl",

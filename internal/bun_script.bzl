@@ -167,3 +167,16 @@ local workflow helper rather than a hermetic build rule.
     executable = True,
     toolchains = ["//bun:toolchain_type"],
 )
+
+bun_script_test = rule(
+    implementation = _bun_script_impl,
+    doc = """Runs a named `package.json` script with Bun as a test target.
+
+Same as `bun_script` but registered as a Bazel test rule, enabling use with
+`bazel test`. Useful for lint, typecheck, and build-check scripts declared in
+`package.json` that should be exercised as part of the test suite.
+""",
+    attrs = _BUN_SCRIPT_ATTRS,
+    test = True,
+    toolchains = ["//bun:toolchain_type"],
+)
