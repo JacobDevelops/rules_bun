@@ -1,0 +1,20 @@
+load("@rules_bun//bun:defs.bzl", "bun_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# Expose source files so //apps/web/test:suite can declare them as data deps.
+filegroup(
+    name = "src",
+    srcs = glob(["src/**/*.ts"]),
+)
+
+# This target is safe to name "test" because there is no test/ directory at
+# the apps/web package root level.  It delegates to the suite target in the
+# test/ sub-package and is the canonical entry point for:
+#   bazel test //apps/web:test
+bun_test(
+    name = "test",
+    srcs = glob(["test/*.test.ts"]),
+    data = [":src"],
+    node_modules = "@npm//:node_modules",
+)

@@ -1,0 +1,20 @@
+# Use the Nix-wrapped host platform so Bazel 9 resolves Nix toolchains correctly.
+# See the nix_host platform definition in //:BUILD.bazel.
+build --host_platform=//:nix_host
+
+build --keep_going
+build --show_result=100
+
+# Disable CGo globally.
+#
+# The Nix-wrapped clang shipped with rules_nixpkgs_cc cannot resolve macOS's
+# system library -lresolv, which CGo links against for DNS resolution.  Turning
+# pure mode on project-wide avoids the linker error without any runtime impact
+# for typical HTTP services.
+#
+# To opt a specific target back in, set `pure = "off"` on its go_binary or
+# go_test rule directly.
+build --@rules_go//go/config:pure=true
+
+test --keep_going
+test --test_output=streamed

@@ -1,0 +1,46 @@
+load("@rules_bun//bun:defs.bzl", "bun_toolchain")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "go.work",
+    "package.json",
+    "bun.lock",
+])
+
+###############################################################################
+# nix_host platform
+#
+# Required for Bazel 9 Nix toolchain compatibility. rules_nixpkgs_cc does not
+# support Bazel 9's updated platform-based toolchain resolution; this platform
+# extends the local host platform while clearing exec_properties so Bazel can
+# still resolve Nix-provided toolchains correctly.
+#
+# Activated via: build --host_platform=//:nix_host  (see .bazelrc)
+###############################################################################
+platform(
+    name = "nix_host",
+    exec_properties = {"OSFamily": ""},
+    parents = ["@local_config_platform//:host"],
+)
+
+###############################################################################
+# Bun toolchain wired to the Nix-provided bun binary.
+#
+# The version string here is informational; the actual binary version is
+# determined by flake.lock (the Nix pin). Update this when bumping bun in
+# flake.nix.
+###############################################################################
+bun_toolchain(
+    name = "nix_bun_toolchain_impl",
+    bun = "@nix_bun//:bin/bun",
+    version = "1.x",
+)
+
+toolchain(
+    name = "nix_bun_toolchain",
+    exec_compatible_with = [],
+    target_compatible_with = [],
+    toolchain = ":nix_bun_toolchain_impl",
+    toolchain_type = "@rules_bun//bun:toolchain_type",
+)

@@ -1,0 +1,97 @@
+module(
+    name = "rules_bun_example_bun_golang_monorepo",
+    version = "0.1.0",
+)
+
+###############################################################################
+# rules_bun: pin to a specific commit via git_override.
+#
+# Uncomment local_path_override when iterating locally against a checkout of
+# rules_bun alongside this example (e.g. `path = "../../rules_bun"`).
+###############################################################################
+bazel_dep(name = "rules_bun", version = "0.0.0")
+
+git_override(
+    module_name = "rules_bun",
+    commit = "REPLACE_WITH_FULL_40_CHAR_SHA",
+    remote = "https://github.com/JacobDevelops/rules_bun.git",
+)
+
+# local_path_override(
+#     module_name = "rules_bun",
+#     path = "../..",  # uncomment when iterating locally
+# )
+
+###############################################################################
+# rules_go: Bazel manages its own hermetic Go SDK download.
+#
+# IMPORTANT: Do NOT add rules_nixpkgs_go here. It is incompatible with
+# rules_go v0.60+. The Nix devshell (flake.nix) provides Go for local
+# development outside Bazel, but Bazel's Go toolchain is entirely separate.
+###############################################################################
+bazel_dep(name = "rules_go", version = "0.60.0")
+
+bazel_dep(name = "gazelle", version = "0.42.0")
+
+###############################################################################
+# Platform definitions (required by rules_go and rules_nixpkgs_core).
+###############################################################################
+bazel_dep(name = "platforms", version = "1.0.0")
+
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+
+bazel_dep(name = "rules_shell", version = "0.6.1")
+
+###############################################################################
+# rules_nixpkgs_core: provides nixpkgs_local_repository + nixpkgs_package,
+# used in extension.bzl to wire up the Nix-pinned Bun binary.
+###############################################################################
+bazel_dep(name = "rules_nixpkgs_core", version = "0.13.0")
+
+###############################################################################
+# Nix toolchain wiring for Bun only.
+#
+# Bun comes from Nix so `nix develop` and Bazel use the exact same binary,
+# pinned by flake.lock. Go does NOT come from Nix — rules_go handles its own
+# hermetic SDK download above.
+###############################################################################
+nix_toolchains = use_extension("//:extension.bzl", "nix_toolchains")
+
+use_repo(nix_toolchains, "nix_bun", "nixpkgs")
+
+###############################################################################
+# Single shared @npm repository from the root bun.lock.
+#
+# One bun_install_repository serves ALL TypeScript packages in the monorepo.
+# No per-package lockfiles needed.
+###############################################################################
+bun_packages = use_extension("//:extension.bzl", "bun_packages")
+
+use_repo(bun_packages, "npm")
+
+###############################################################################
+# Toolchain registration MUST live here in MODULE.bazel, NOT in extension.bzl.
+#
+# Bazel 9 visibility rules prevent repositories created by module extensions
+# from referencing targets in other external repositories (such as
+# @rules_bun//bun:toolchain_type). Placing register_toolchains here avoids
+# the visibility error.
+###############################################################################
+register_toolchains("//:nix_bun_toolchain")
+
+###############################################################################
+# Go dependencies resolved via go.work (covers all Go modules in the monorepo).
+#
+# After adding or updating Go dependencies, run:
+#   bazel run @gazelle//:gazelle -- update-repos -from_file=go.work -to_macro=go_deps.bzl%go_dependencies
+# then regenerate BUILD files:
+#   bazel run @gazelle//:gazelle
+###############################################################################
+go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
+
+go_deps.from_file(go_work = "//:go.work")
+
+use_repo(
+    go_deps,
+    # Populated by gazelle update-repos. Add entries here after running Gazelle.
+)
