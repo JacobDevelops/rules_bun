@@ -62,7 +62,10 @@ def _bun_test_impl(ctx):
         "env_file_short_paths": [runfiles_path(file) for file in ctx.files.env_files],
         "test_short_paths": [runfiles_path(file) for file in ctx.files.srcs],
     })
-    launcher = declare_runtime_wrapper(ctx, bun_bin, spec_file)
+    # WHY _runner suffix: avoids runfiles collision when target name matches a source directory
+    # (e.g., target "test" + source dir "test/"). Bazel always places DefaultInfo.executable at
+    # _main/{pkg}/{name} in runfiles; without a suffix this shadows any same-named source directory.
+    launcher = declare_runtime_wrapper(ctx, bun_bin, spec_file, wrapper_suffix = "_runner")
 
     return [
         workspace_info,
@@ -71,7 +74,7 @@ def _bun_test_impl(ctx):
             runfiles = workspace_runfiles(
                 ctx,
                 workspace_info,
-                direct_files = [launcher.executable, launcher.runner, spec_file],
+                direct_files = [launcher.runner, spec_file],
                 transitive_files = dep_runfiles,
             ),
         ),

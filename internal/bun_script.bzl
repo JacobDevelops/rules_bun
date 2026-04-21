@@ -66,7 +66,7 @@ def _bun_script_impl(ctx):
             runfiles = workspace_runfiles(
                 ctx,
                 workspace_info,
-                direct_files = [launcher.executable, launcher.runner, spec_file],
+                direct_files = [launcher.runner, spec_file],
             ),
         ),
     ]

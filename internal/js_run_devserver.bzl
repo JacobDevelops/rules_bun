@@ -53,7 +53,7 @@ def _js_run_devserver_impl(ctx):
             runfiles = workspace_runfiles(
                 ctx,
                 workspace_info,
-                direct_files = [launcher.executable, launcher.runner, spec_file, tool_default_info.files_to_run.executable],
+                direct_files = [launcher.runner, spec_file, tool_default_info.files_to_run.executable],
                 transitive_files = dep_runfiles,
             ).merge(tool_default_info.default_runfiles),
         ),

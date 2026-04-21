@@ -151,9 +151,9 @@ def write_launcher_spec(ctx, spec):
     )
     return spec_file
 
-def declare_runtime_wrapper(ctx, bun_bin, spec_file):
+def declare_runtime_wrapper(ctx, bun_bin, spec_file, wrapper_suffix = ""):
     runner = ctx.file._runtime_launcher
-    wrapper = ctx.actions.declare_file(ctx.label.name + (".cmd" if is_windows_target(ctx) else ""))
+    wrapper = ctx.actions.declare_file(ctx.label.name + wrapper_suffix + (".cmd" if is_windows_target(ctx) else ""))
     content = _CMD_WRAPPER_TEMPLATE if is_windows_target(ctx) else _POSIX_WRAPPER_TEMPLATE
     content = content.replace("__BUN_RUNFILES_PATH__", runfiles_path(bun_bin)).replace(
         "__RUNNER_RUNFILES_PATH__",
