@@ -143,8 +143,8 @@ def runtime_launcher_attrs():
 def is_windows_target(ctx):
     return ctx.target_platform_has_constraint(ctx.attr._windows_constraint[platform_common.ConstraintValueInfo])
 
-def write_launcher_spec(ctx, spec):
-    spec_file = ctx.actions.declare_file(ctx.label.name + ".launcher.json")
+def write_launcher_spec(ctx, spec, wrapper_suffix = ""):
+    spec_file = ctx.actions.declare_file(ctx.label.name + wrapper_suffix + ".launcher.json")
     ctx.actions.write(
         output = spec_file,
         content = json.encode(spec) + "\n",

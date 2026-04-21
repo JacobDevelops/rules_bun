@@ -61,7 +61,7 @@ def _bun_test_impl(ctx):
         "preload_short_paths": [runfiles_path(file) for file in ctx.files.preload],
         "env_file_short_paths": [runfiles_path(file) for file in ctx.files.env_files],
         "test_short_paths": [runfiles_path(file) for file in ctx.files.srcs],
-    })
+    }, wrapper_suffix = "_runner")
     # WHY _runner suffix: avoids runfiles collision when target name matches a source directory
     # (e.g., target "test" + source dir "test/"). Bazel always places DefaultInfo.executable at
     # _main/{pkg}/{name} in runfiles; without a suffix this shadows any same-named source directory.
