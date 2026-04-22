@@ -1,0 +1,18 @@
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# golangci-lint run via `go tool` (Go 1.25+ tool directive in go.mod).
+#
+# Why `go tool` instead of the Nix golangci-lint binary: the Nix binary panics
+# on `go 1.26` modules.  Using `go tool` ties the linter to the same Go
+# toolchain that compiled the code.
+#
+# Why cp -rL: Bazel runfiles are a symlink farm. `//go:embed` rejects
+# non-regular files, so the lint wrapper dereferences all symlinks into a
+# temporary directory before running golangci-lint.
+sh_test(
+    name = "lint_test",
+    srcs = ["lint_test.sh"],
+    data = glob(["**/*.go"]) + ["go.mod"],
+)

@@ -1,0 +1,17 @@
+load("@rules_bun//bun:defs.bzl", "bun_test")
+
+# IMPORTANT: This target is named "suite", NOT "test".
+#
+# Bazel places DefaultInfo.executable at _main/{pkg}/{target_name} in runfiles.
+# A target named "test" in this package would shadow the test/ source directory
+# at _main/apps/web/test in runfiles, preventing Bun from resolving the test
+# files.  Any name other than "test" is safe here.
+#
+# See also: apps/web/BUILD.bazel where a target named "test" IS safe because
+# that package has no test/ subdirectory.
+bun_test(
+    name = "suite",
+    srcs = glob(["*.test.ts"]),
+    data = ["//apps/web:src"],
+    node_modules = "@npm//:node_modules",
+)

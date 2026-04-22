@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "@example/monorepo",
+    },
+    "apps/web": {
+      "name": "@example/web",
+    },
+  },
+  "packages": {
+    "@example/web": ["@example/web@workspace:apps/web"],
+  }
+}

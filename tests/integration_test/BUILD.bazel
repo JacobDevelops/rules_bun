@@ -5,6 +5,7 @@ test_suite(
     tests = [
         ":examples_basic_hot_restart_shape_test",
         ":examples_basic_run_e2e_test",
+        ":examples_bun_golang_monorepo_e2e_build_test",
         ":examples_vite_monorepo_catalog_shape_test",
         ":examples_vite_monorepo_e2e_test",
         ":examples_workspace_bundle_e2e_test",
@@ -93,6 +94,24 @@ sh_test(
     data = [
         "//examples/vite_monorepo:app_a_dev",
         "//examples/vite_monorepo:app_b_dev",
+    ],
+)
+
+sh_test(
+    name = "examples_bun_golang_monorepo_e2e_build_test",
+    size = "small",
+    srcs = ["examples_bun_golang_monorepo_e2e_build_test.sh"],
+    args = [
+        "$(location //examples/bun_golang_monorepo:MODULE.bazel)",
+        "$(location //examples/bun_golang_monorepo:MODULE.bazel.lock)",
+        "$(location //examples/bun_golang_monorepo:go.work)",
+        "$(location //examples/bun_golang_monorepo:README.md)",
+    ],
+    data = [
+        "//examples/bun_golang_monorepo:MODULE.bazel",
+        "//examples/bun_golang_monorepo:MODULE.bazel.lock",
+        "//examples/bun_golang_monorepo:go.work",
+        "//examples/bun_golang_monorepo:README.md",
     ],
 )
 

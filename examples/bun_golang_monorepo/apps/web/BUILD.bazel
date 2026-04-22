@@ -1,0 +1,15 @@
+package(default_visibility = ["//visibility:public"])
+
+# Expose source files so //apps/web/test:suite can declare them as data deps.
+filegroup(
+    name = "src",
+    srcs = glob(["src/**/*.ts"]),
+)
+
+# Canonical entry point for `bazel test //apps/web:test`.
+# Delegates to the suite in the test/ sub-package; a glob here would be empty
+# because test/ is its own Bazel package and globs don't cross package boundaries.
+alias(
+    name = "test",
+    actual = "//apps/web/test:suite",
+)

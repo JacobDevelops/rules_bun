@@ -13,6 +13,7 @@ Usage samples demonstrating common `rules_bun` integration patterns. Each exampl
 | `basic/` | Minimal single-file Bun binary and TypeScript entry point (see `basic/AGENTS.md`) |
 | `vite_monorepo/` | Multi-app Vite monorepo with `bun_install` workspace deps and `bun_script` runners (see `vite_monorepo/AGENTS.md`) |
 | `workspace/` | npm workspace example with multiple packages linked via `bun_install` (see `workspace/AGENTS.md`) |
+| `bun_golang_monorepo/` | rules_bun + rules_go + Nix toolchains in a single Bzlmod workspace — Go HTTP service, TypeScript/Bun app, shared @npm (see `bun_golang_monorepo/AGENTS.md`) |
 
 ## For AI Agents
 
