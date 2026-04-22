@@ -13,6 +13,15 @@
 #      an sh_test), so the flag doesn't propagate.
 set -euo pipefail
 
+# Resolve RUNFILES_DIR using the standard Bazel fallback chain.
+if [[ -n "${TEST_SRCDIR:-}" ]]; then
+  RUNFILES_DIR="${TEST_SRCDIR}"
+elif [[ -d "${BASH_SOURCE[0]}.runfiles" ]]; then
+  RUNFILES_DIR="${BASH_SOURCE[0]}.runfiles"
+elif [[ -n "${RUNFILES_MANIFEST_FILE:-}" ]]; then
+  RUNFILES_DIR="${RUNFILES_MANIFEST_FILE%/MANIFEST}"
+fi
+
 MODULE_SRC="${RUNFILES_DIR}/_main/apps/api"
 MODULE_DIR=$(mktemp -d)
 trap 'rm -rf "$MODULE_DIR"' EXIT
