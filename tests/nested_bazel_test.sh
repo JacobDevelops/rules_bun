@@ -18,6 +18,8 @@ setup_nested_bazel_cmd() {
   mkdir -p "${nested_bazel_base}"
   nested_bazel_root="$(mktemp -d "${nested_bazel_base}/session.XXXXXX")"
   mkdir -p "${nested_bazel_root}/tmp"
+  mkdir -p "${nested_bazel_root}/home"
+  mkdir -p "${nested_bazel_root}/mise_config"
 
   scrubbed_env_vars=(
     BAZEL_TEST
@@ -53,11 +55,28 @@ setup_nested_bazel_cmd() {
     XML_OUTPUT_FILE
   )
 
+  local _path_entry _filtered_path=""
+  while IFS= read -r _path_entry; do
+    case "${_path_entry}" in
+      */mise/shims | */asdf/shims | */.volta/bin) ;;
+      *)
+        if [[ ! -x "${_path_entry}/mise" ]]; then
+          _filtered_path="${_filtered_path:+${_filtered_path}:}${_path_entry}"
+        fi
+        ;;
+    esac
+  done < <(printf '%s' "${PATH:-}" | tr ':' '\n')
+
   nested_bazel_env=(env)
   for env_var in "${scrubbed_env_vars[@]}"; do
     nested_bazel_env+=("-u" "${env_var}")
   done
-  nested_bazel_env+=("TMPDIR=${nested_bazel_root}/tmp")
+  nested_bazel_env+=(
+    "TMPDIR=${nested_bazel_root}/tmp"
+    "HOME=${nested_bazel_root}/home"
+    "MISE_CONFIG_DIR=${nested_bazel_root}/mise_config"
+    "PATH=${_filtered_path}"
+  )
 
   bazel_cmd=(
     "${nested_bazel_env[@]}"
