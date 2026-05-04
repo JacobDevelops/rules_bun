@@ -41,6 +41,7 @@ sh_test(
     srcs = ["examples_basic_hot_restart_shape_test.sh"],
     args = ["$(location //examples/basic:web_dev_hot_restart)"],
     data = ["//examples/basic:web_dev_hot_restart"],
+    env_inherit = ["PATH"],
 )
 
 sh_test(
@@ -95,6 +96,7 @@ sh_test(
         "//examples/vite_monorepo:app_a_dev",
         "//examples/vite_monorepo:app_b_dev",
     ],
+    env_inherit = ["PATH"],
 )
 
 sh_test(

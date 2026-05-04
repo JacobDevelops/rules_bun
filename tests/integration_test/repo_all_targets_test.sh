@@ -14,6 +14,6 @@ assert_contains() {
 }
 
 assert_contains './tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}"'
-assert_contains 'mapfile -t targets < <(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")'
+assert_contains 'while IFS= read -r line; do targets+=("$line"); done < <(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")'
 assert_contains 'nix develop --accept-flake-config -c bazel test --test_output=errors "${targets[@]}"'
 assert_contains 'bazel test --test_output=errors "${targets[@]}"'

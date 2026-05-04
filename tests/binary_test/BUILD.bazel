@@ -108,6 +108,7 @@ sh_test(
     srcs = ["verify_runtime_flags_shape.sh"],
     args = ["$(location :runtime_flag_bin)"],
     data = [":runtime_flag_bin"],
+    env_inherit = ["PATH"],
 )
 
 bun_binary(
@@ -135,6 +136,7 @@ sh_test(
     srcs = ["verify_configured_launcher_shape.sh"],
     args = ["$(location :configured_launcher_bin)"],
     data = [":configured_launcher_bin"],
+    env_inherit = ["PATH"],
 )
 
 bun_binary(

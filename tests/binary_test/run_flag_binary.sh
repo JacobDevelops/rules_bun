@@ -7,7 +7,7 @@ run_launcher() {
   local launcher="$1"
   shift
   if [[ ${launcher} == *.cmd ]]; then
-    cmd.exe /c call "${launcher}" "$@" | tr -d '\r'
+    cmd.exe //c call "${launcher}" "$@" | tr -d '\r'
     return 0
   fi
   "${launcher}" "$@"

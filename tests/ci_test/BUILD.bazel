@@ -32,4 +32,5 @@ sh_test(
         "//tests/js_compat_test:compat_devserver",
         "//tests/script_test:workspace_flagged_script",
     ],
+    env_inherit = ["PATH"],
 )

@@ -8,7 +8,7 @@ run_launcher() {
   local launcher="$1"
   shift
   if [[ ${launcher} == *.cmd ]]; then
-    env PATH="rules_bun_host_path_sentinel:${PATH:-}" cmd.exe /c call "${launcher}" "$@" | tr -d '\r'
+    env PATH="rules_bun_host_path_sentinel:${PATH:-}" cmd.exe //c call "${launcher}" "$@" | tr -d '\r'
     return 0
   fi
   env PATH="rules_bun_host_path_sentinel:${PATH:-}" "${launcher}" "$@"

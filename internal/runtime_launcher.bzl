@@ -111,13 +111,15 @@ exit /b %ERRORLEVEL%
 :rlocation
 set "LOOKUP=%~1"
 set "OUTPUT_VAR=%~2"
-if defined RUNFILES_DIR_VALUE (
+if defined RUNFILES_DIR_VALUE if exist "%RUNFILES_DIR_VALUE%\\%LOOKUP:/=\\%" (
   set "%OUTPUT_VAR%=%RUNFILES_DIR_VALUE%\\%LOOKUP:/=\\%"
   exit /b 0
 )
-for /f "tokens=1,* delims= " %%A in ('findstr /b /c:"%LOOKUP% " "%RUNFILES_MANIFEST_VALUE%"') do (
-  set "%OUTPUT_VAR%=%%B"
-  exit /b 0
+if defined RUNFILES_MANIFEST_VALUE (
+  for /f "tokens=1,* delims= " %%A in ('findstr /b /c:"%LOOKUP% " "%RUNFILES_MANIFEST_VALUE%"') do (
+    set "%OUTPUT_VAR%=%%B"
+    exit /b 0
+  )
 )
 echo rules_bun: missing runfile %LOOKUP% 1>&2
 exit /b 1

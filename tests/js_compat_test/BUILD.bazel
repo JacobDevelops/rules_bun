@@ -70,4 +70,5 @@ sh_test(
         ":compat_devserver_with_package_dir_hint",
         ":compat_devserver_with_package_json",
     ],
+    env_inherit = ["PATH"],
 )

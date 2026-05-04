@@ -71,12 +71,14 @@ jobs:
         shell: bash
         run: |
           echo "Phase 8 target: ${{ matrix.phase8_target }}"
-          mapfile -t targets < <(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")
+          targets=()
+          while IFS= read -r line; do targets+=("$line"); done < <(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")
           nix develop --accept-flake-config -c bazel test --test_output=errors "${targets[@]}"
       - name: Run tests (${{ matrix.phase8_target }})
         if: runner.os == 'Windows'
         shell: bash
         run: |
           echo "Phase 8 target: ${{ matrix.phase8_target }}"
-          mapfile -t targets < <(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")
+          targets=()
+          while IFS= read -r line; do targets+=("$line"); done < <(./tests/ci_test/phase8_ci_targets.sh "${{ matrix.phase8_target }}")
           bazel test --test_output=errors "${targets[@]}"
