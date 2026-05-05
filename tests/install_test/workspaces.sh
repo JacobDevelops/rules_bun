@@ -5,6 +5,7 @@ bun_path="$1"
 if [[ ${bun_path} != /* ]]; then
   bun_path="$(cd "$(dirname "${bun_path}")" && pwd -P)/$(basename "${bun_path}")"
 fi
+export PATH="$(dirname "${bun_path}"):${PATH}"
 workdir="$(mktemp -d)"
 trap 'rm -rf "${workdir}"' EXIT
 

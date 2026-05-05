@@ -54,6 +54,7 @@ sh_test(
     srcs = ["run_vite_app.sh"],
     args = ["$(location :vite_dev_server)"],
     data = [":vite_dev_server"],
+    env_inherit = ["PATH"],
 )
 
 bun_script(
@@ -90,6 +91,7 @@ sh_test(
         ":vite_monorepo_app_a_dev_server",
         ":vite_monorepo_app_b_dev_server",
     ],
+    env_inherit = ["PATH"],
 )
 
 sh_test(
@@ -104,6 +106,7 @@ sh_test(
         ":paraglide_monorepo_app_a_build",
         ":vite_monorepo_app_a_dev_server",
     ],
+    env_inherit = ["PATH"],
 )
 
 bun_script(
@@ -241,4 +244,5 @@ sh_test(
         "system",
     ],
     data = [":workspace_flagged_script"],
+    env_inherit = ["PATH"],
 )

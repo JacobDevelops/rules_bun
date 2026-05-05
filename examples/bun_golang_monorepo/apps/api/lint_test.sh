@@ -14,11 +14,11 @@
 set -euo pipefail
 
 # Resolve RUNFILES_DIR using the standard Bazel fallback chain.
-if [[ -n "${TEST_SRCDIR:-}" ]]; then
+if [[ -n ${TEST_SRCDIR:-} ]]; then
   RUNFILES_DIR="${TEST_SRCDIR}"
 elif [[ -d "${BASH_SOURCE[0]}.runfiles" ]]; then
   RUNFILES_DIR="${BASH_SOURCE[0]}.runfiles"
-elif [[ -n "${RUNFILES_MANIFEST_FILE:-}" ]]; then
+elif [[ -n ${RUNFILES_MANIFEST_FILE:-} ]]; then
   RUNFILES_DIR="${RUNFILES_MANIFEST_FILE%/MANIFEST}"
 fi
 

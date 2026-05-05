@@ -54,6 +54,7 @@ sh_test(
         ":configured_retry_suite",
         ":configured_suite",
     ],
+    env_inherit = ["PATH"],
 )
 
 sh_test(
@@ -70,6 +71,7 @@ sh_test(
     srcs = ["cache_hit_shape.sh"],
     args = ["$(location :passing_suite)"],
     data = [":passing_suite"],
+    env_inherit = ["PATH"],
 )
 
 sh_test(
@@ -78,6 +80,7 @@ sh_test(
     srcs = ["cache_miss_shape.sh"],
     args = ["$(location :configured_suite)"],
     data = [":configured_suite"],
+    env_inherit = ["PATH"],
 )
 
 sh_test(
@@ -86,4 +89,5 @@ sh_test(
     srcs = ["junit_shape.sh"],
     args = ["$(location :configured_suite)"],
     data = [":configured_suite"],
+    env_inherit = ["PATH"],
 )

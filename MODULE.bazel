@@ -25,6 +25,7 @@ use_repo(
 bun_install_ext = use_extension("//bun:extensions.bzl", "bun_install", dev_dependency = True)
 bun_install_ext.install(
     name = "script_test_vite_node_modules",
+    backend = "copyfile",
     bun_lockfile = "//tests/script_test:vite_app/bun.lock",
     package_json = "//tests/script_test:vite_app/package.json",
 )
@@ -32,6 +33,7 @@ use_repo(bun_install_ext, "script_test_vite_node_modules")
 
 bun_install_ext.install(
     name = "script_test_vite_monorepo_node_modules",
+    backend = "copyfile",
     bun_lockfile = "//tests/script_test:vite_monorepo/bun.lock",
     package_json = "//tests/script_test:vite_monorepo/package.json",
 )
